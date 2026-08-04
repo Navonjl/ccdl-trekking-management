@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Instance folder: the SQLite database, e-mail outbox and generated CSV
+# exports. All created at runtime by init-db / the Celery jobs, so none of it
+# belongs in git or in the submission zip.
+instance/
+
+# Node / Vue build output
+node_modules/
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
+
+# Celery
+celerybeat-schedule*
+*.pid
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
