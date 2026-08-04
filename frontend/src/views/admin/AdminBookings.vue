@@ -17,6 +17,7 @@ export default {
       // bookings endpoint has no ?q= parameter.
       q: '',
       error: '',
+      notice: '',
       loading: false,
     }
   },
@@ -63,9 +64,11 @@ export default {
 
     async markPaid(booking) {
       this.error = ''
+      this.notice = ''
       try {
         const updated = await api.markBookingPaid(booking.id)
         booking.payment_status = updated.payment_status
+        this.notice = `Booking #${booking.id} marked as paid.`
       } catch (e) {
         this.error = e.message
       }
@@ -91,6 +94,7 @@ export default {
     <h1 class="h3 mb-3">All bookings</h1>
 
     <div v-if="error" class="alert alert-danger">{{ error }}</div>
+    <div v-if="notice" class="alert alert-success">{{ notice }}</div>
 
     <p class="text-muted">
       {{ counts.total }} total &middot; {{ counts.booked }} booked &middot;

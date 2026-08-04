@@ -51,7 +51,9 @@ export default {
     <div v-if="error" class="alert alert-danger">{{ error }}</div>
 
     <p v-if="loading" class="text-muted">Loading...</p>
-    <p v-else-if="participants.length === 0" class="text-muted">
+    <!-- Only say the trek is empty when the request actually succeeded;
+         otherwise a refused request would claim nobody has booked. -->
+    <p v-else-if="!error && participants.length === 0" class="text-muted">
       Nobody has booked this trek yet.
     </p>
 
