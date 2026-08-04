@@ -450,3 +450,25 @@ def list_bookings():
 
     bookings = query.order_by(Booking.booking_date.desc()).all()
     return jsonify([b.to_dict() for b in bookings])
+
+
+@admin_bp.post("/bookings/<int:booking_id>/mark-paid")
+@auth_required("token")
+@roles_required(ROLE_ADMIN)
+def mark_booking_paid(booking_id):
+    """Record that a booking has been paid for.
+
+    The spec lists payment as an optional extra, so this is kept deliberately
+    simple: there is no real payment gateway, the admin just records that the
+    money arrived.
+    """
+    booking = db.session.get(Booking, booking_id)
+    if not booking:
+        return error("Booking not found.", 404)
+
+    if booking.status == "Cancelled":
+        return error("This booking was cancelled.")
+
+    booking.payment_status = "Paid"
+    db.session.commit()
+    return jsonify(booking.to_dict())

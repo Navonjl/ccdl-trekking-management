@@ -27,6 +27,7 @@
  *             POST   /api/admin/users/<id>/deactivate | reactivate
  *             POST   /api/admin/users/<id>/blacklist  | unblacklist
  *             GET    /api/admin/bookings?status&trek_id
+ *             POST   /api/admin/bookings/<id>/mark-paid
  *   staff     GET    /api/staff/dashboard
  *             PUT    /api/staff/treks/<id>                {available_slots, status}
  *             GET    /api/staff/treks/<id>/participants
@@ -291,8 +292,18 @@ export const api = {
     return request('/admin/users/' + userId + '/' + action, { method: 'POST' })
   },
 
+  markBookingPaid(bookingId) {
+    return request('/admin/bookings/' + bookingId + '/mark-paid', { method: 'POST' })
+  },
+
   async adminBookings(filters) {
     return asList(await request('/admin/bookings' + queryString(filters)), 'bookings', 'items')
+  },
+
+  // Payment simulation: there is no gateway, the admin just records that the
+  // money arrived.
+  markBookingPaid(bookingId) {
+    return request('/admin/bookings/' + bookingId + '/mark-paid', { method: 'POST' })
   },
 
   /* ---- staff ---- */

@@ -61,6 +61,16 @@ export default {
       }
     },
 
+    async markPaid(booking) {
+      this.error = ''
+      try {
+        const updated = await api.markBookingPaid(booking.id)
+        booking.payment_status = updated.payment_status
+      } catch (e) {
+        this.error = e.message
+      }
+    },
+
     fmt(value) {
       if (!value) return '-'
       const d = new Date(value)
@@ -133,6 +143,8 @@ export default {
             <th>Booked on</th>
             <th>Status</th>
             <th>Payment</th>
+            <!-- Holds the "Mark as paid" button, so it has no title. -->
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -145,6 +157,17 @@ export default {
             <td>{{ fmt(b.booking_date) }}</td>
             <td><span class="badge" :class="statusClass(b.status)">{{ b.status }}</span></td>
             <td>{{ b.payment_status }}</td>
+            <td>
+              <!-- There is no real payment gateway; the admin just records
+                   that the money came in. -->
+              <button
+                v-if="b.payment_status !== 'Paid' && b.status !== 'Cancelled'"
+                class="btn btn-sm btn-outline-success"
+                @click="markPaid(b)"
+              >
+                Mark as paid
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>

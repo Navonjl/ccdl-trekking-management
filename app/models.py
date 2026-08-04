@@ -152,20 +152,6 @@ class Booking(db.Model):
     user = db.relationship("User", back_populates="bookings")
     trek = db.relationship("Trek", back_populates="bookings")
 
-    __table_args__ = (
-        # The API already refuses a second booking, but that check cannot stop
-        # two requests that arrive at the same instant. This index makes the
-        # database the final word. It skips Cancelled rows, so someone who
-        # cancelled may book the same trek again.
-        db.Index(
-            "uq_one_active_booking_per_trek",
-            "user_id",
-            "trek_id",
-            unique=True,
-            sqlite_where=db.text("status != 'Cancelled'"),
-        ),
-    )
-
     def to_dict(self):
         return {
             "id": self.id,

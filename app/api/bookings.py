@@ -3,16 +3,14 @@
 All the "other core functionality" rules from the spec live in book_trek()
 below as plain if-statements, so they are easy to read out and easy to change.
 
-Two of them are backed up in the database as well, because an `if` on its own
-only works when requests arrive one at a time: the slot count is decremented
-by a conditional UPDATE, and a unique index stops a second active booking for
-the same user and trek. The if-statements still come first, so the normal case
-returns a helpful message rather than a database error.
+The one exception is the slot count. Reading it, checking it and then
+subtracting one lets two people who press Book at the same instant both take
+the last slot, so that single rule is done as one conditional UPDATE and the
+database decides. See the comment on Rule 3.
 """
 
 from flask import Blueprint, jsonify, request
 from flask_security import auth_required, current_user
-from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
 from ..models import Booking, Trek
@@ -75,13 +73,7 @@ def book_trek():
 
     # The seat count and the booking row are saved in ONE commit, so the two
     # can never disagree: if the insert fails, the decrement rolls back too.
-    try:
-        db.session.commit()
-    except IntegrityError:
-        # The unique index in models.py refused a second active booking for
-        # this user and trek -- two requests raced past the check above.
-        db.session.rollback()
-        return error("You have already booked this trek.")
+    db.session.commit()
 
     # available_slots just changed, so the cached trek listing is now stale.
     clear_trek_cache()
