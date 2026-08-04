@@ -172,7 +172,7 @@ export default {
           Working... (task {{ taskId }})
         </span>
 
-        <button v-if="exportState === 'SUCCESS'" class="btn btn-success btn-sm" @click="download">
+        <button v-if="exportFile" class="btn btn-success btn-sm" @click="download">
           Download {{ exportFile }}
         </button>
       </div>

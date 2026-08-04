@@ -23,3 +23,7 @@ celerybeat-schedule*
 .idea/
 *.swp
 .DS_Store
+
+# Screenshots and traces from browser-driven testing
+.playwright-mcp/
+*.png

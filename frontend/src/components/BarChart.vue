@@ -24,11 +24,13 @@ export default {
     this.chart = new Chart(this.$refs.canvas, {
       type: 'bar',
       data: {
-        labels: this.labels,
+        // Plain copies with [...]: ChartJS keeps and mutates these arrays
+        // internally, and it should not be holding on to Vue's reactive proxies.
+        labels: [...this.labels],
         datasets: [
           {
             label: this.label,
-            data: this.values,
+            data: [...this.values],
             backgroundColor: '#198754', // Bootstrap's success green
           },
         ],
@@ -36,6 +38,9 @@ export default {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        // Animation off on purpose: the bars are redrawn whenever the data
+        // changes, and an interrupted grow-animation leaves bars half drawn.
+        animation: false,
         scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
       },
     })
@@ -54,8 +59,8 @@ export default {
   methods: {
     redraw() {
       if (!this.chart) return
-      this.chart.data.labels = this.labels
-      this.chart.data.datasets[0].data = this.values
+      this.chart.data.labels = [...this.labels]
+      this.chart.data.datasets[0].data = [...this.values]
       this.chart.update()
     },
   },

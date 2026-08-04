@@ -11,6 +11,10 @@ export default {
   data() {
     return {
       bookings: [],
+      // These two are what the API filters on (?status= and ?trek_id=).
+      filters: { status: '', trek_id: '' },
+      // The free-text box is applied here in the browser, because the admin
+      // bookings endpoint has no ?q= parameter.
       q: '',
       error: '',
       loading: false,
@@ -20,14 +24,28 @@ export default {
     this.load()
   },
   computed: {
+    /** The rows actually shown: server results narrowed by the text box. */
+    visible() {
+      const q = this.q.toLowerCase()
+      if (!q) return this.bookings
+      return this.bookings.filter(
+        (b) =>
+          (b.trek_name || '').toLowerCase().includes(q) ||
+          (b.user_name || '').toLowerCase().includes(q) ||
+          (b.user_email || '').toLowerCase().includes(q),
+      )
+    },
+
     // A one-line summary above the table, computed from the rows we already have
     // so it costs no extra request.
     counts() {
-      const total = this.bookings.length
-      const booked = this.bookings.filter((b) => b.status === 'Booked').length
-      const completed = this.bookings.filter((b) => b.status === 'Completed').length
-      const cancelled = this.bookings.filter((b) => b.status === 'Cancelled').length
-      return { total, booked, completed, cancelled }
+      const rows = this.visible
+      return {
+        total: rows.length,
+        booked: rows.filter((b) => b.status === 'Booked').length,
+        completed: rows.filter((b) => b.status === 'Completed').length,
+        cancelled: rows.filter((b) => b.status === 'Cancelled').length,
+      }
     },
   },
   methods: {
@@ -35,7 +53,7 @@ export default {
       this.error = ''
       this.loading = true
       try {
-        this.bookings = await api.adminBookings(this.q)
+        this.bookings = await api.adminBookings(this.filters)
       } catch (e) {
         this.error = e.message
       } finally {
@@ -69,21 +87,41 @@ export default {
       {{ counts.completed }} completed &middot; {{ counts.cancelled }} cancelled
     </p>
 
-    <form class="row g-2 mb-3" @submit.prevent="load">
-      <div class="col-sm-6 col-md-4">
-        <input v-model.trim="q" class="form-control" placeholder="Search by trek or user" />
+    <form class="row g-2 mb-3 align-items-end" @submit.prevent="load">
+      <div class="col-sm-5 col-md-4">
+        <label class="form-label" for="bq">Search (in the loaded rows)</label>
+        <input id="bq" v-model.trim="q" class="form-control" placeholder="trek, user or email" />
+      </div>
+      <div class="col-sm-3 col-md-2">
+        <label class="form-label" for="bstatus">Status</label>
+        <select id="bstatus" v-model="filters.status" class="form-select" @change="load">
+          <option value="">Any</option>
+          <option>Booked</option>
+          <option>Cancelled</option>
+          <option>Completed</option>
+        </select>
+      </div>
+      <div class="col-sm-2">
+        <label class="form-label" for="btrek">Trek id</label>
+        <input id="btrek" v-model="filters.trek_id" type="number" min="1" class="form-control" />
       </div>
       <div class="col-auto">
-        <button class="btn btn-outline-success" :disabled="loading">Search</button>
+        <button class="btn btn-outline-success" :disabled="loading">Apply</button>
       </div>
       <div class="col-auto">
-        <button type="button" class="btn btn-outline-secondary" @click="q = ''; load()">Clear</button>
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          @click="q = ''; filters = { status: '', trek_id: '' }; load()"
+        >
+          Clear
+        </button>
       </div>
     </form>
 
-    <p v-if="!loading && bookings.length === 0" class="text-muted">No bookings found.</p>
+    <p v-if="!loading && visible.length === 0" class="text-muted">No bookings found.</p>
 
-    <div class="table-responsive" v-if="bookings.length">
+    <div class="table-responsive" v-if="visible.length">
       <table class="table table-sm table-hover align-middle">
         <thead>
           <tr>
@@ -98,7 +136,7 @@ export default {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="b in bookings" :key="b.id">
+          <tr v-for="b in visible" :key="b.id">
             <td>{{ b.id }}</td>
             <td>{{ b.user_name }}</td>
             <td>{{ b.user_email }}</td>

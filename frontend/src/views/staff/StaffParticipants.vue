@@ -37,17 +37,6 @@ export default {
       const d = new Date(value)
       return isNaN(d) ? value : d.toLocaleString()
     },
-
-    /** The API may nest the trekker or flatten it onto the booking row. */
-    name(row) {
-      return row.user_name || row.full_name || (row.user && row.user.full_name) || '-'
-    },
-    email(row) {
-      return row.user_email || row.email || (row.user && row.user.email) || '-'
-    },
-    phone(row) {
-      return row.phone || (row.user && row.user.phone) || '-'
-    },
   },
 }
 </script>
@@ -71,6 +60,7 @@ export default {
         <thead>
           <tr>
             <th>#</th>
+            <th>Booking</th>
             <th>Name</th>
             <th>Email</th>
             <th>Phone</th>
@@ -80,14 +70,15 @@ export default {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(row, index) in participants" :key="row.id || index">
+          <tr v-for="(row, index) in participants" :key="row.booking_id || index">
             <td>{{ index + 1 }}</td>
-            <td>{{ name(row) }}</td>
-            <td>{{ email(row) }}</td>
-            <td>{{ phone(row) }}</td>
+            <td>#{{ row.booking_id }}</td>
+            <td>{{ row.name }}</td>
+            <td>{{ row.email }}</td>
+            <td>{{ row.phone }}</td>
             <td>{{ fmt(row.booking_date) }}</td>
-            <td>{{ row.status || '-' }}</td>
-            <td>{{ row.payment_status || '-' }}</td>
+            <td>{{ row.booking_status }}</td>
+            <td>{{ row.payment_status }}</td>
           </tr>
         </tbody>
       </table>

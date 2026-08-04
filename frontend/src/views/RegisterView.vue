@@ -92,9 +92,9 @@ export default {
             type="password"
             class="form-control"
             required
-            minlength="8"
+            minlength="6"
           />
-          <div class="form-text">At least 8 characters.</div>
+          <div class="form-text">At least 6 characters.</div>
         </div>
 
         <div class="mb-3">
@@ -105,7 +105,7 @@ export default {
             type="password"
             class="form-control"
             required
-            minlength="8"
+            minlength="6"
           />
         </div>
 

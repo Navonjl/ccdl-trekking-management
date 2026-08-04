@@ -90,7 +90,7 @@ export default {
 
         <div class="mb-3">
           <label class="form-label" for="ppass">New password</label>
-          <input id="ppass" v-model="password" type="password" class="form-control" minlength="8" />
+          <input id="ppass" v-model="password" type="password" class="form-control" minlength="6" />
           <div class="form-text">Leave blank to keep your current password.</div>
         </div>
 
