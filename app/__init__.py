@@ -3,8 +3,9 @@
 Read this file first: it shows how every other piece is attached.
 """
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_security import SQLAlchemyUserDatastore
+from werkzeug.exceptions import HTTPException
 
 from .celery_utils import celery_init_app
 from .config import Config
@@ -40,5 +41,17 @@ def create_app():
 
     from .cli import register_cli
     register_cli(app)
+
+    # This app only ever answers with JSON, so errors should be JSON too.
+    # Without this, sending a number where a name was expected returns an HTML
+    # error page, which the Vue front end cannot read.
+    @app.errorhandler(HTTPException)
+    def handle_http_error(e):
+        return jsonify({"error": e.description}), e.code
+
+    @app.errorhandler(Exception)
+    def handle_unexpected_error(e):
+        app.logger.exception("unhandled error")
+        return jsonify({"error": "Something went wrong on the server."}), 500
 
     return app

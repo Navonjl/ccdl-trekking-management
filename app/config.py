@@ -10,7 +10,13 @@ INSTANCE_DIR = BASE_DIR / "instance"
 class Config:
     # --- Flask ----------------------------------------------------------
     SECRET_KEY = "dev-secret-change-me"
+
+    # DEBUG gives us the auto-reloader, which is handy while developing.
+    # PROPAGATE_EXCEPTIONS turns off the interactive Werkzeug debugger page,
+    # so an unexpected error returns the JSON error below instead of an HTML
+    # page containing our source code.
     DEBUG = True
+    PROPAGATE_EXCEPTIONS = False
 
     # Paths, exposed on the class so create_app() can make the folders.
     INSTANCE_DIR = INSTANCE_DIR

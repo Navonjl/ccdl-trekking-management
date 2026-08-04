@@ -18,7 +18,7 @@ from flask_security import auth_required, current_user, hash_password
 
 from ..extensions import db, security
 from ..models import ROLE_USER
-from . import error, require_fields
+from . import blocked_check, error, require_fields
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api")
 
@@ -80,6 +80,7 @@ def me():
 
 @auth_bp.put("/profile")
 @auth_required("token")
+@blocked_check
 def update_profile():
     """A user edits their OWN profile. There is no user id in the URL, so this
     route can never be used to edit somebody else's account.
