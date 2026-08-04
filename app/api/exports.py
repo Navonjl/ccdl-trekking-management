@@ -16,6 +16,7 @@ from flask_security import auth_required, current_user
 from werkzeug.utils import secure_filename
 
 from ..config import Config
+from ..tasks import export_bookings_csv
 from . import blocked_check, error
 
 exports_bp = Blueprint("exports", __name__, url_prefix="/api")
@@ -36,10 +37,6 @@ def is_my_export(filename):
 @blocked_check
 def start_export():
     """Queue the CSV job for the logged-in user and return its task id."""
-    # Imported inside the view: app/tasks.py imports the models and the app
-    # package, so importing it at module level would be circular.
-    from ..tasks import export_bookings_csv
-
     task = export_bookings_csv.delay(current_user.id)
     return jsonify({"task_id": task.id, "state": "PENDING"}), 202
 

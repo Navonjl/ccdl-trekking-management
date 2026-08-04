@@ -9,7 +9,7 @@ import click
 from flask_security import hash_password
 
 from .extensions import db, security
-from .models import ROLE_ADMIN, ROLE_STAFF, ROLE_USER, StaffProfile, Trek, User
+from .models import ROLE_ADMIN, ROLE_STAFF, ROLE_USER
 
 
 def register_cli(app):
@@ -23,10 +23,7 @@ def register_cli(app):
             (ROLE_STAFF, "Runs the treks assigned to them"),
             (ROLE_USER, "Books and goes on treks"),
         ):
-            if not security.datastore.find_or_create_role(
-                name=name, description=description
-            ):
-                pass
+            security.datastore.find_or_create_role(name=name, description=description)
         db.session.commit()
 
         # Exactly one admin, created programmatically. There is no admin

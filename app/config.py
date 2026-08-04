@@ -1,6 +1,5 @@
 """All application configuration lives in this one class."""
 
-import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent

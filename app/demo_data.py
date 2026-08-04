@@ -12,7 +12,7 @@ from datetime import date, datetime, timedelta
 from flask_security import hash_password
 
 from .extensions import db, security
-from .models import ROLE_STAFF, ROLE_USER, Booking, StaffProfile, Trek, User
+from .models import ROLE_STAFF, ROLE_USER, Booking, StaffProfile, Trek
 
 STAFF_PASSWORD = "staff123"
 TREKKER_PASSWORD = "trekker123"
