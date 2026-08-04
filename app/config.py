@@ -78,7 +78,10 @@ class Config:
     MAIL_PASSWORD = ""
     MAIL_SENDER = "no-reply@example.com"
 
-    # Optional: Google Chat webhook for the daily reminder job.
+
+    # Paste a Google Chat "incoming webhook" URL here and the daily reminder
+    # job posts to that space instead of writing an e-mail. Easier to show
+    # working than e-mail: the message just appears in the chat.
     GCHAT_WEBHOOK_URL = ""
 
     OUTBOX_DIR = INSTANCE_DIR / "outbox"

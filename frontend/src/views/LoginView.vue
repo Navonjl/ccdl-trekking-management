@@ -4,7 +4,7 @@
  * is one login form here. Where you land afterwards depends on the roles that
  * /api/me reports back.
  */
-import { api, extractToken } from '@/api'
+import { api } from '@/api'
 import { store } from '@/store'
 
 export default {
@@ -24,7 +24,8 @@ export default {
       try {
         // Step 1: exchange email + password for the auth token.
         const data = await api.login(this.email, this.password)
-        const token = extractToken(data)
+        // Flask-Security puts the token here when include_auth_token is set.
+        const token = data?.response?.user?.authentication_token
         if (!token) throw new Error('Login succeeded but no auth token was returned.')
         store.setToken(token)
 
@@ -77,7 +78,6 @@ export default {
             type="password"
             class="form-control"
             required
-            minlength="4"
             autocomplete="current-password"
           />
         </div>

@@ -10,8 +10,7 @@ from flask_security import auth_required, current_user
 
 from ..config import Config
 from ..extensions import cache
-from ..models import ROLE_ADMIN, ROLE_STAFF, Booking, Trek
-from . import error
+from ..models import ROLE_ADMIN, ROLE_STAFF, Trek
 
 treks_bp = Blueprint("treks", __name__, url_prefix="/api")
 
@@ -98,24 +97,3 @@ def list_treks():
 
     treks = query.order_by(Trek.start_date, Trek.name).all()
     return jsonify([trek.to_dict() for trek in treks])
-
-
-@treks_bp.get("/treks/<int:trek_id>")
-@auth_required("token")
-def get_trek(trek_id):
-    """One trek's detail page. Not cached: it is a single row lookup."""
-    trek = Trek.query.get(trek_id)
-    if not trek:
-        return error("Trek not found.", 404)
-
-    if not is_privileged():
-        # A trekker may open a trek that is on offer, or one they have
-        # booked -- otherwise their own history would break as soon as the
-        # trek was marked Completed.
-        booked = Booking.query.filter_by(
-            user_id=current_user.id, trek_id=trek.id
-        ).first()
-        if trek.status not in TREKKER_VISIBLE_STATUSES and not booked:
-            return error("This trek is not available.", 403)
-
-    return jsonify(trek.to_dict())

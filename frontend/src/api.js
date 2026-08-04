@@ -106,24 +106,6 @@ async function request(path, { method = 'GET', body = null } = {}) {
   return data
 }
 
-/**
- * List endpoints may answer either a bare array or an object wrapping one
- * (e.g. {"treks": [...]}). Normalising here keeps every view's code identical:
- * they always receive a plain array.
- */
-function asList(data, ...keys) {
-  if (Array.isArray(data)) return data
-  if (data && typeof data === 'object') {
-    for (const key of keys) {
-      if (Array.isArray(data[key])) return data[key]
-    }
-    // Fall back to the first array-valued property, whatever it is called.
-    const firstArray = Object.values(data).find((v) => Array.isArray(v))
-    if (firstArray) return firstArray
-  }
-  return []
-}
-
 /** Build "?a=1&b=2", skipping empty filter boxes so we do not send q=. */
 function queryString(params) {
   const search = new URLSearchParams()
@@ -132,23 +114,6 @@ function queryString(params) {
   }
   const s = search.toString()
   return s ? '?' + s : ''
-}
-
-/**
- * Dig the auth token out of the login response.
- *
- * Flask-Security 5.x returns {"response": {"user": {"authentication_token": ...}}},
- * but older/other configurations nest it differently, so read whichever of the
- * known positions actually holds a string rather than assuming one shape.
- */
-export function extractToken(data) {
-  const candidates = [
-    data?.response?.user?.authentication_token,
-    data?.response?.authentication_token,
-    data?.user?.authentication_token,
-    data?.authentication_token,
-  ]
-  return candidates.find((t) => typeof t === 'string' && t.length > 0) || ''
 }
 
 /* ------------------------------------------------------------- the API calls */
@@ -186,12 +151,12 @@ export const api = {
 
   /* ---- trekker: browsing and booking ---- */
 
-  async treks(filters) {
-    return asList(await request('/treks' + queryString(filters)), 'treks', 'items')
+  treks(filters) {
+    return request('/treks' + queryString(filters))
   },
 
-  async bookings() {
-    return asList(await request('/bookings'), 'bookings', 'items')
+  bookings() {
+    return request('/bookings')
   },
 
   bookTrek(trekId) {
@@ -241,8 +206,8 @@ export const api = {
     return request('/admin/stats')
   },
 
-  async adminTreks(q) {
-    return asList(await request('/admin/treks' + queryString({ q })), 'treks', 'items')
+  adminTreks(q) {
+    return request('/admin/treks' + queryString({ q }))
   },
 
   createTrek(payload) {
@@ -269,16 +234,16 @@ export const api = {
     })
   },
 
-  async adminStaff(q) {
-    return asList(await request('/admin/staff' + queryString({ q })), 'staff', 'items')
+  adminStaff(q) {
+    return request('/admin/staff' + queryString({ q }))
   },
 
   createStaff(payload) {
     return request('/admin/staff', { method: 'POST', body: payload })
   },
 
-  async adminUsers(q) {
-    return asList(await request('/admin/users' + queryString({ q })), 'users', 'items')
+  adminUsers(q) {
+    return request('/admin/users' + queryString({ q }))
   },
 
   /**
@@ -292,12 +257,8 @@ export const api = {
     return request('/admin/users/' + userId + '/' + action, { method: 'POST' })
   },
 
-  markBookingPaid(bookingId) {
-    return request('/admin/bookings/' + bookingId + '/mark-paid', { method: 'POST' })
-  },
-
-  async adminBookings(filters) {
-    return asList(await request('/admin/bookings' + queryString(filters)), 'bookings', 'items')
+  adminBookings(filters) {
+    return request('/admin/bookings' + queryString(filters))
   },
 
   // Payment simulation: there is no gateway, the admin just records that the
@@ -308,9 +269,11 @@ export const api = {
 
   /* ---- staff ---- */
 
-  // The server wraps the list: {staff: {...}, assigned_treks: [...], total_assigned: n}.
+  // This one answers {staff: {...}, assigned_treks: [...], total_assigned: n},
+  // so pull out the list the page actually wants.
   async staffDashboard() {
-    return asList(await request('/staff/dashboard'), 'assigned_treks', 'treks')
+    const data = await request('/staff/dashboard')
+    return data.assigned_treks
   },
 
   /** Staff may change only the slots and the status of a trek assigned to them. */
@@ -318,12 +281,9 @@ export const api = {
     return request('/staff/treks/' + id, { method: 'PUT', body: payload })
   },
 
+  // Answers {trek: {...}, participants: [...], total: n}.
   async participants(trekId) {
-    return asList(
-      await request('/staff/treks/' + trekId + '/participants'),
-      'participants',
-      'bookings',
-      'items',
-    )
+    const data = await request('/staff/treks/' + trekId + '/participants')
+    return data.participants
   },
 }

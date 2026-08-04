@@ -5,8 +5,8 @@
  *
  * ChartJS draws onto a <canvas> with plain DOM code, so it cannot be driven by a
  * Vue template. Hence the lifecycle hooks: create the chart once the canvas
- * exists (mounted), redraw it when the numbers change (watch), and destroy it on
- * the way out (beforeUnmount) so the canvas is not leaked.
+ * exists (mounted), and destroy it on the way out (beforeUnmount) so the
+ * canvas is not leaked.
  */
 import Chart from 'chart.js/auto'
 
@@ -38,8 +38,7 @@ export default {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        // Animation off on purpose: the bars are redrawn whenever the data
-        // changes, and an interrupted grow-animation leaves bars half drawn.
+        // No grow animation: the numbers are a snapshot, not a live feed.
         animation: false,
         scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
       },
@@ -47,22 +46,6 @@ export default {
   },
   beforeUnmount() {
     if (this.chart) this.chart.destroy()
-  },
-  watch: {
-    values() {
-      this.redraw()
-    },
-    labels() {
-      this.redraw()
-    },
-  },
-  methods: {
-    redraw() {
-      if (!this.chart) return
-      this.chart.data.labels = [...this.labels]
-      this.chart.data.datasets[0].data = [...this.values]
-      this.chart.update()
-    },
   },
 }
 </script>

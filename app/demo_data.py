@@ -19,9 +19,9 @@ TREKKER_PASSWORD = "trekker123"
 
 # full name, e-mail, phone, employee code
 STAFF = [
-    ("Ramesh Iyer", "ramesh.staff@example.com", "9800000011", "EMP-001"),
-    ("Fatima Sheikh", "fatima.staff@example.com", "9800000012", "EMP-002"),
-    ("Joseph Mathew", "joseph.staff@example.com", "9800000013", "EMP-003"),
+    ("Ramesh Iyer", "ramesh.staff@example.com", "9800000011", "STF001"),
+    ("Fatima Sheikh", "fatima.staff@example.com", "9800000012", "STF002"),
+    ("Joseph Mathew", "joseph.staff@example.com", "9800000013", "STF003"),
 ]
 
 # full name, e-mail, phone

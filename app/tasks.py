@@ -61,7 +61,8 @@ def send_daily_reminders():
             user = booking.user
             name = user.full_name or user.email
 
-            # Google Chat when a webhook is configured, e-mail otherwise.
+            # The spec allows e-mail, SMS or a webhook. Google Chat when a
+            # webhook is configured, e-mail otherwise.
             if send_gchat(f"Hi {name}, reminder: {details}"):
                 sent += 1
             elif send_email(
