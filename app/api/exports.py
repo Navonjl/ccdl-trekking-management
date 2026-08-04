@@ -21,6 +21,16 @@ from . import blocked_check, error
 exports_bp = Blueprint("exports", __name__, url_prefix="/api")
 
 
+def is_my_export(filename):
+    """True if this export file belongs to the logged-in user.
+
+    app/tasks.py names every file "bookings-user<id>-<timestamp>.csv", so the
+    owner is in the name. Without this check any logged-in user could download
+    somebody else's booking history just by guessing a file name.
+    """
+    return bool(filename) and filename.startswith(f"bookings-user{current_user.id}-")
+
+
 @exports_bp.post("/exports/bookings")
 @auth_required("token")
 @blocked_check
@@ -45,7 +55,12 @@ def export_status(task_id):
     if result.successful():
         # The task returns {"filename": ...}; see app/tasks.py.
         value = result.result or {}
-        body["filename"] = value.get("filename")
+        filename = value.get("filename")
+        # Task ids are not secret, so only hand back the file name if this
+        # export is actually the caller's own.
+        if not is_my_export(filename):
+            return error("This export does not belong to you.", 403)
+        body["filename"] = filename
     elif result.failed():
         body["error"] = str(result.result)
 
@@ -61,6 +76,9 @@ def download_export(filename):
     safe_name = secure_filename(filename)
     if not safe_name:
         return error("Bad file name.")
+
+    if not is_my_export(safe_name):
+        return error("This export does not belong to you.", 403)
 
     if not (Config.EXPORT_DIR / safe_name).is_file():
         return error("Export file not found.", 404)
