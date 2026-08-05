@@ -1,9 +1,37 @@
-"""All application configuration lives in this one class."""
+"""All application configuration lives in this one class.
 
+Anything that is a secret, or that changes between machines, is read from the
+.env file in the project root instead of being written here.
+"""
+
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 INSTANCE_DIR = BASE_DIR / "instance"
+
+
+def load_env_file():
+    """Copy KEY=value lines from .env into the environment.
+
+    Written by hand rather than with python-dotenv: the project statement lists
+    the libraries we may use, and that is not one of them. Existing environment
+    variables win, so `GCHAT_WEBHOOK_URL=... uv run python main.py` still
+    overrides the file.
+    """
+    env_path = BASE_DIR / ".env"
+    if not env_path.exists():
+        return
+
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip())
+
+
+load_env_file()
 
 
 class Config:
@@ -82,7 +110,7 @@ class Config:
     # Paste a Google Chat "incoming webhook" URL here and the daily reminder
     # job posts to that space instead of writing an e-mail. Easier to show
     # working than e-mail: the message just appears in the chat.
-    GCHAT_WEBHOOK_URL = ""
+    GCHAT_WEBHOOK_URL = os.environ.get("GCHAT_WEBHOOK_URL", "")
 
     OUTBOX_DIR = INSTANCE_DIR / "outbox"
     EXPORT_DIR = INSTANCE_DIR / "exports"

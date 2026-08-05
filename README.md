@@ -96,10 +96,21 @@ uv run python -c "from app import create_app; create_app().app_context().push();
 from app.tasks import send_daily_reminders; print(send_daily_reminders())"
 ```
 
-`Config.MAIL_SERVER` is empty by default, so mail is written to
-`instance/outbox/` as `.eml` files rather than sent. That way the jobs can be
-demonstrated without an SMTP server. Set the `MAIL_*` values in
-`app/config.py` to send for real.
+### Where the reminders go
+
+The daily reminder job posts to a Google Chat space when a webhook is
+configured, and falls back to e-mail when it is not.
+
+`GCHAT_WEBHOOK_URL` is read from the `.env` file in the project root by
+`load_env_file()` in `app/config.py` (written by hand -- python-dotenv is not
+one of the libraries the project statement allows). To point the reminders at
+a different space, create an incoming webhook in that space under
+**Apps & integrations -> Add webhooks** and replace the value in `.env`.
+
+`Config.MAIL_SERVER` is empty by default, so e-mail is written to
+`instance/outbox/` as `.eml` files rather than sent. That way the monthly
+report and the export alert can be demonstrated without an SMTP server. Set
+the `MAIL_*` values in `app/config.py` to send for real.
 
 ## Notes
 
