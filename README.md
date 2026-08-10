@@ -5,6 +5,10 @@ Staff and User (Trekker). Flask serves a JSON API, Vue 3 provides the
 interface, SQLite stores the data, Redis caches the trek listing, and Celery
 runs the batch jobs.
 
+## Demo video
+
+https://drive.google.com/file/d/1U_JzIsp07bKsglbXrQOeZfjqiluvrjXR/view?usp=sharing
+
 ## What is where
 
 | Path | Contents |
