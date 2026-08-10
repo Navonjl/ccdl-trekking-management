@@ -28,3 +28,13 @@ celerybeat-schedule*
 # the images under docs/ are part of the notes and are tracked.
 .playwright-mcp/
 /*.png
+
+# Course material and my own viva notes: kept locally, not pushed.
+docs/mad2-project-and-viva-instructions.md
+docs/trekking-management-application-v2.md
+docs/viva-evaluation-rubric.md
+docs/viva-walkthrough.md
+docs/images/project-folder-structure.png
+docs/images/submission-file-tree.png
+docs/images/submission-portal-fields.png
+docs/images/viva-workflow-flowchart.png
