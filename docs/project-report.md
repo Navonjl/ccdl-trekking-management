@@ -143,4 +143,4 @@ shown straight away.
 
 ## Video presentation
 
-Drive link: [to be added]
+Drive link: https://drive.google.com/file/d/1U_JzIsp07bKsglbXrQOeZfjqiluvrjXR/view?usp=sharing
