@@ -80,13 +80,7 @@ is the response cache, 2 is the Celery result backend.
 
 ## Database design
 
-```
-  role ──< roles_users >── user ──1:1── staff_profile
-                            │                │
-                            │                │ assigned to
-                          makes              ↓
-                            └──────> booking <──── trek
-```
+![ER diagram](images/er-diagram.png)
 
 | Table | Key fields |
 | --- | --- |
