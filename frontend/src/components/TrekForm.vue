@@ -5,7 +5,7 @@
  * This is a child component, and it shows the standard Vue parent/child
  * contract: data comes DOWN through props (`trek`, `staff`) and events go UP
  * through emit ("save" with the edited values, "cancel" to close the form).
- * The child never talks to the API itself -- AdminTreks.vue does that.
+ * The child never talks to the API itself; AdminTreks.vue does that.
  *
  * Note: available_slots is NOT a field here. The server derives it
  * (total_slots minus the seats already booked), so letting the admin type a

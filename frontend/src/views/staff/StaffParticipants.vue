@@ -3,7 +3,7 @@
  * The registered trekkers for one trek.
  *
  * The trek id arrives in the URL (/staff/treks/:id/participants) and is read
- * from this.$route.params.id -- that is how the dashboard passes the selection
+ * from this.$route.params.id, which is how the dashboard passes the selection
  * to this component.
  */
 import { api } from '@/api'
@@ -44,7 +44,7 @@ export default {
 <template>
   <div>
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h1 class="h3 mb-0">Participants &mdash; trek #{{ trekId }}</h1>
+      <h1 class="h3 mb-0">Participants for trek #{{ trekId }}</h1>
       <router-link class="btn btn-outline-secondary btn-sm" to="/staff">Back to my treks</router-link>
     </div>
 

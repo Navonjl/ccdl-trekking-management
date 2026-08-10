@@ -1,6 +1,6 @@
 """Trek staff endpoints: /api/staff/...
 
-Staff accounts are made by the admin (see app/api/admin.py) -- there is no
+Staff accounts are made by the admin (see app/api/admin.py), so there is no
 staff registration route.
 
 The rule that matters here is "only assigned staff can manage a trek". Every

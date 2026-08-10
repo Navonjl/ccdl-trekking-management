@@ -14,7 +14,7 @@ export default {
   methods: {
     async logout() {
       // Tell the server too, so it can invalidate the session. If that call
-      // fails we still log out locally -- the user asked to leave.
+      // fails we still log out locally, since the user asked to leave.
       try {
         await api.logout()
       } catch {

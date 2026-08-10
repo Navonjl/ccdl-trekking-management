@@ -1,7 +1,7 @@
 """Command line commands.
 
 `flask init-db` creates the tables and the one admin account. The database is
-created here in code -- the project spec forbids making it by hand in a tool
+created here in code, because the project spec forbids making it by hand in a tool
 like DB Browser for SQLite.
 """
 

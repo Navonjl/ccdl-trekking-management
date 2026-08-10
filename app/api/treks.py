@@ -1,6 +1,6 @@
 """Reading treks: the list (with search + filters) and one trek's detail.
 
-Creating and editing treks is not here -- admin does that in api/admin.py and
+Creating and editing treks is not here. Admin does that in api/admin.py, and
 staff in api/staff.py. This module is the read side, and the read side is the
 part that gets hit on every page load, so it is the part we cache in Redis.
 """
@@ -60,7 +60,7 @@ def list_treks():
 
     Caching note: `unless=is_privileged` means only the trekker view is
     cached. The cache key is the path plus the query string, so it does not
-    include the role -- if admins shared it, one admin request would poison
+    include the role, so if admins shared it one admin request would poison
     the trekker listing with Pending treks. Admin and staff are also the
     people editing treks, so they want live numbers anyway.
 

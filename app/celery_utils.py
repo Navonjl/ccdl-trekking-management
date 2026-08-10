@@ -2,7 +2,7 @@
 
 The Celery instance is created here by `celery_init_app`, which is called from
 `create_app` in app/__init__.py. Its configuration comes from the `CELERY`
-dict in app/config.py -- there is exactly one place for each.
+dict in app/config.py, so there is exactly one place for each.
 
 Tasks need the Flask application context to touch the database, so every task
 is wrapped in one by the FlaskTask base class below. That is why a task can

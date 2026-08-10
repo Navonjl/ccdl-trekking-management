@@ -2,9 +2,9 @@
 
 Three steps, one endpoint each:
 
-1. POST /api/exports/bookings   -- hand the work to Celery, get a task id back
-2. GET  /api/exports/<task_id>  -- the SPA polls this until the state is ready
-3. GET  /api/exports/download/<filename> -- fetch the finished file
+1. POST /api/exports/bookings   hand the work to Celery, get a task id back
+2. GET  /api/exports/<task_id>  the SPA polls this until the state is ready
+3. GET  /api/exports/download/<filename> fetch the finished file
 
 The Flask request never builds the CSV itself; the Celery worker does, so the
 browser is not left waiting on it.

@@ -4,7 +4,7 @@
     beat:   uv run celery -A celery_worker.celery beat --loglevel=info
 
 `create_app()` calls celery_init_app(), which stores the Celery instance in
-app.extensions["celery"] -- that is the object Celery needs here.
+app.extensions["celery"], which is the object Celery needs here.
 """
 
 from app import create_app

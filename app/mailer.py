@@ -2,8 +2,8 @@
 
 Both use only the Python standard library, which the project spec requires:
 
-* send_gchat -- one HTTP POST to a Google Chat webhook via urllib.
-* send_email -- smtplib if MAIL_SERVER is set in config.py, otherwise the
+* send_gchat: one HTTP POST to a Google Chat webhook via urllib.
+* send_email: smtplib if MAIL_SERVER is set in config.py, otherwise the
   message is written into instance/outbox/ as a .eml file. That default lets
   the Celery jobs be demonstrated without running an SMTP server.
 

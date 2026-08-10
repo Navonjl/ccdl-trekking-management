@@ -1,7 +1,7 @@
 """Admin endpoints: /api/admin/...
 
 Everything here needs a valid token AND the admin role, so every view carries
-both decorators. There is no admin registration anywhere -- the single admin
+both decorators. There is no admin registration anywhere. The single admin
 row is made by `flask init-db`.
 
 The business rules (valid difficulty, valid status, cannot delete a trek that
@@ -378,7 +378,7 @@ def get_manageable_user(user_id):
 @auth_required("token")
 @roles_required(ROLE_ADMIN)
 def deactivate_user(user_id):
-    """Works for a trekker or a staff member -- one unified user table."""
+    """Works for a trekker or a staff member: one unified user table."""
     user, denied = get_manageable_user(user_id)
     if denied:
         return denied

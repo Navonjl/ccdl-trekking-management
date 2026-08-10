@@ -3,8 +3,8 @@
  *
  * Two custom fields are attached to routes with `meta`, and the single guard at
  * the bottom of this file is what reads them:
- *   meta.requiresAuth  -- must be logged in
- *   meta.role          -- must additionally hold that role
+ *   meta.requiresAuth  must be logged in
+ *   meta.role          must additionally hold that role
  */
 import { createRouter, createWebHistory } from 'vue-router'
 import { store } from '@/store'

@@ -41,6 +41,6 @@ export default {
   </main>
 
   <footer class="container text-center text-muted py-3 border-top">
-    <small>Trekking Management Application &mdash; IITM MAD-2 project</small>
+    <small>Trekking Management Application (IITM MAD-2 project)</small>
   </footer>
 </template>

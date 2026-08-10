@@ -2,8 +2,8 @@
 
 Authentication and role checks use Flask-Security's own decorators:
 
-    @auth_required("token")     -- must send a valid Authentication-Token
-    @roles_required("admin")    -- must additionally hold that role
+    @auth_required("token")     must send a valid Authentication-Token
+    @roles_required("admin")    must additionally hold that role
 
 `blocked_check` is ours, because "blacklisted" is our own concept.
 """

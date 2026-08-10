@@ -29,7 +29,7 @@ def register():
 
     The role is hard-coded to "user" below. There is deliberately no "role"
     field read from the request body, so nobody can register as admin or
-    staff -- staff accounts are created by the admin, and the single admin is
+    staff. Staff accounts are created by the admin, and the single admin is
     created by the `flask init-db` command.
     """
     data = request.get_json(silent=True)
@@ -44,7 +44,7 @@ def register():
     phone = data["phone"].strip()
 
     # Backend validation. The Vue forms check the same things, but a form is
-    # not a security boundary -- anyone can POST here with curl.
+    # not a security boundary, since anyone can POST here with curl.
     if "@" not in email or "." not in email:
         return error("Please give a valid email address.")
     if len(password) < 6:

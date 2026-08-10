@@ -1,8 +1,8 @@
 """The three Celery jobs asked for in the project statement.
 
-  a. send_daily_reminders          -- scheduled, runs every evening
-  b. send_monthly_activity_report  -- scheduled, runs on the 1st of the month
-  c. export_bookings_csv           -- triggered by a user from their dashboard
+  a. send_daily_reminders          scheduled, runs every evening
+  b. send_monthly_activity_report  scheduled, runs on the 1st of the month
+  c. export_bookings_csv           triggered by a user from their dashboard
 
 The schedules for (a) and (b) are in the beat_schedule in app/celery_utils.py;
 the task names below are what that schedule refers to.

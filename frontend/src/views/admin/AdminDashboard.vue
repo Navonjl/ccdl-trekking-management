@@ -5,7 +5,7 @@
  *
  * Two requests are made. /api/admin/stats gives the counts (it is cached in
  * Redis on the server, so it is cheap). The chart needs bookings-per-trek, which
- * stats does not provide, so the booking list is fetched and grouped here -- the
+ * stats does not provide, so the booking list is fetched and grouped here. The
  * admin bookings page needs that same list anyway.
  *
  * Every count tile is a link into the page that manages that thing, which is how

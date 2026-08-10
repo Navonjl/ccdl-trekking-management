@@ -35,7 +35,7 @@ TREKKERS = [
 
 def load_demo_data():
     if not security.datastore.find_role(ROLE_USER):
-        print("roles are missing -- run `flask init-db` first")
+        print("roles are missing, run `flask init-db` first")
         return
 
     # Idempotent: one trek in the table means the demo data is already there.

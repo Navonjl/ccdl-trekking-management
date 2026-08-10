@@ -66,7 +66,7 @@ class Config:
 
     # By default Flask-Security checks an e-mail domain really exists by doing
     # a DNS lookup. We only need addresses to be well-formed, and the lookup
-    # would fail on a machine with no network -- so it is turned off.
+    # would fail on a machine with no network, so it is turned off.
     # (Note: reserved domains like ".local" are rejected whatever this is set
     # to, which is why the demo accounts use example.com.)
     SECURITY_EMAIL_VALIDATOR_ARGS = {"check_deliverability": False}
@@ -105,7 +105,6 @@ class Config:
     MAIL_USERNAME = ""
     MAIL_PASSWORD = ""
     MAIL_SENDER = "no-reply@example.com"
-
 
     # Paste a Google Chat "incoming webhook" URL here and the daily reminder
     # job posts to that space instead of writing an e-mail. Easier to show

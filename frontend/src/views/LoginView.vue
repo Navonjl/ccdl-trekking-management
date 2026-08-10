@@ -1,6 +1,6 @@
 <script>
 /**
- * Login for all three roles -- there is one user table on the server, so there
+ * Login for all three roles. There is one user table on the server, so there
  * is one login form here. Where you land afterwards depends on the roles that
  * /api/me reports back.
  */

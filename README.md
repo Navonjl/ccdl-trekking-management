@@ -1,6 +1,6 @@
 # Trekking Management Application (MAD-2)
 
-A trekking management web application with three roles -- Admin, Trek Staff and
+A trekking management web application with three roles: Admin, Trek Staff and
 User (Trekker). Flask serves a JSON API, Vue 3 provides the interface, SQLite
 stores the data, Redis caches trek listings, and Celery runs the batch jobs.
 
@@ -12,7 +12,7 @@ stores the data, Redis caches trek listings, and Celery runs the batch jobs.
 | `celery_worker.py` | entry point for the Celery worker and beat |
 | `app/config.py` | every configuration value, in one class |
 | `app/models.py` | the database models, with the reasoning for the schema |
-| `app/__init__.py` | the application factory -- read this first |
+| `app/__init__.py` | the application factory, read this first |
 | `app/extensions.py` | the `db`, `cache` and `security` objects |
 | `app/celery_utils.py` | creates the Celery instance and the beat schedule |
 | `app/tasks.py` | the three batch jobs |
@@ -25,12 +25,12 @@ stores the data, Redis caches trek listings, and Celery runs the batch jobs.
 ## Requirements
 
 - Python 3.13 and [uv](https://docs.astral.sh/uv/)
-- Node 20 or newer
+- Node 22 or newer (Vite 8 requires it; see engines in frontend/package.json)
 - Redis on `localhost:6379`
 
 ## Running it
 
-Do steps 1 and 2 **before** a demo -- they download packages and are the slow
+Do steps 1 and 2 **before** a demo, since they download packages and are the slow
 part.
 
 ```bash
@@ -59,7 +59,7 @@ uv run celery -A celery_worker.celery worker --loglevel=info
 uv run celery -A celery_worker.celery beat --loglevel=info
 ```
 
-Open **http://localhost:5173** -- not port 5000. Port 5000 is the API only and
+Open **http://localhost:5173**, not port 5000. Port 5000 is the API only and
 has nothing to show at `/`.
 
 The Vite dev server proxies `/api` to Flask, so the browser sees a single
@@ -76,7 +76,7 @@ The admin is created by `init-db`; its details are at the bottom of
 | Trek Staff | `ramesh.staff@example.com` | `staff123` |
 | Trekker | `asha@example.com` | `trekker123` |
 
-Admin and staff accounts cannot be registered -- the admin is created by
+Admin and staff accounts cannot be registered: the admin is created by
 `init-db`, and staff are created by the admin. Only trekkers may sign up.
 
 ## The batch jobs
@@ -102,7 +102,7 @@ The daily reminder job posts to a Google Chat space when a webhook is
 configured, and falls back to e-mail when it is not.
 
 `GCHAT_WEBHOOK_URL` is read from the `.env` file in the project root by
-`load_env_file()` in `app/config.py` (written by hand -- python-dotenv is not
+`load_env_file()` in `app/config.py` (written by hand, because python-dotenv is not
 one of the libraries the project statement allows). To point the reminders at
 a different space, create an incoming webhook in that space under
 **Apps & integrations -> Add webhooks** and replace the value in `.env`.

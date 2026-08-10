@@ -84,7 +84,7 @@ def book_trek():
 @bookings_bp.get("/bookings")
 @auth_required("token")
 def my_bookings():
-    """The current user's own bookings -- their complete trekking history.
+    """The current user's own bookings, their complete trekking history.
 
     Filtered by current_user.id, so a user cannot read anyone else's history.
     The admin's "all bookings" view is a separate route in api/admin.py.

@@ -1,7 +1,7 @@
 <script>
 /**
  * Every booking in the system: the admin's view of all historical trekking data.
- * Read-only on purpose -- cancelling belongs to the trekker, and trek status
+ * Read-only on purpose: cancelling belongs to the trekker, and trek status
  * belongs to the assigned staff.
  */
 import { api } from '@/api'
