@@ -1,18 +1,19 @@
 # Trekking Management Application (MAD-2)
 
-A trekking management web application with three roles: Admin, Trek Staff and
-User (Trekker). Flask serves a JSON API, Vue 3 provides the interface, SQLite
-stores the data, Redis caches trek listings, and Celery runs the batch jobs.
+A web application for running trekking trips, with three roles: Admin, Trek
+Staff and User (Trekker). Flask serves a JSON API, Vue 3 provides the
+interface, SQLite stores the data, Redis caches the trek listing, and Celery
+runs the batch jobs.
 
 ## What is where
 
 | Path | Contents |
 | --- | --- |
-| `main.py` | entry point; starts the API server |
+| `main.py` | entry point, starts the API server |
 | `celery_worker.py` | entry point for the Celery worker and beat |
+| `app/__init__.py` | the application factory, worth reading first |
 | `app/config.py` | every configuration value, in one class |
 | `app/models.py` | the database models, with the reasoning for the schema |
-| `app/__init__.py` | the application factory, read this first |
 | `app/extensions.py` | the `db`, `cache` and `security` objects |
 | `app/celery_utils.py` | creates the Celery instance and the beat schedule |
 | `app/tasks.py` | the three batch jobs |
@@ -24,14 +25,14 @@ stores the data, Redis caches trek listings, and Celery runs the batch jobs.
 
 ## Requirements
 
-- Python 3.13 and [uv](https://docs.astral.sh/uv/)
-- Node 22 or newer (Vite 8 requires it; see engines in frontend/package.json)
-- Redis on `localhost:6379`
+Python 3.13 with [uv](https://docs.astral.sh/uv/), Node 22 or newer, and Redis
+on `localhost:6379`. Node 22 is the floor because Vite 8 requires it; the exact
+range is in `engines` in `frontend/package.json`.
 
 ## Running it
 
-Do steps 1 and 2 **before** a demo, since they download packages and are the slow
-part.
+The first two steps download packages and are the slow part, so do them ahead
+of any demo.
 
 ```bash
 # 1. Python dependencies
@@ -50,24 +51,22 @@ uv run flask --app main init-db
 uv run flask --app main seed-demo
 ```
 
-Then start the four processes, each in its own terminal:
+Then start four processes, each in its own terminal:
 
 ```bash
-uv run python main.py                                    # API      -> :5000
+uv run python main.py                                    # API       -> :5000
 cd frontend && npm run dev                               # interface -> :5173
 uv run celery -A celery_worker.celery worker --loglevel=info
 uv run celery -A celery_worker.celery beat --loglevel=info
 ```
 
-Open **http://localhost:5173**, not port 5000. Port 5000 is the API only and
-has nothing to show at `/`.
-
-The Vite dev server proxies `/api` to Flask, so the browser sees a single
-origin and no CORS handling is needed.
+Open http://localhost:5173. Port 5000 is the API on its own and has nothing to
+show at `/`. The Vite dev server proxies `/api` through to Flask, so the
+browser only ever sees one origin and no CORS handling is needed.
 
 ## Logging in
 
-The admin is created by `init-db`; its details are at the bottom of
+`init-db` creates the admin, whose details are at the bottom of
 `app/config.py`. `seed-demo` prints the credentials of every account it makes.
 
 | Role | Email | Password |
@@ -76,8 +75,8 @@ The admin is created by `init-db`; its details are at the bottom of
 | Trek Staff | `ramesh.staff@example.com` | `staff123` |
 | Trekker | `asha@example.com` | `trekker123` |
 
-Admin and staff accounts cannot be registered: the admin is created by
-`init-db`, and staff are created by the admin. Only trekkers may sign up.
+Only trekkers can sign up. The admin comes from `init-db` and staff accounts
+are created by the admin, so neither has a registration route.
 
 ## The batch jobs
 
@@ -89,7 +88,7 @@ Admin and staff accounts cannot be registered: the admin is created by
 | `send_monthly_activity_report` | 1st of the month, 06:00 | e-mails the admin an HTML report for the previous month |
 | `export_bookings_csv` | when a user asks | writes that user's booking history to CSV |
 
-To run one immediately instead of waiting for its schedule:
+To run one straight away instead of waiting for its schedule:
 
 ```bash
 uv run python -c "from app import create_app; create_app().app_context().push(); \
@@ -98,25 +97,27 @@ from app.tasks import send_daily_reminders; print(send_daily_reminders())"
 
 ### Where the reminders go
 
-The daily reminder job posts to a Google Chat space when a webhook is
-configured, and falls back to e-mail when it is not.
+The reminder job posts to a Google Chat space when a webhook is configured, and
+writes e-mail when it is not.
 
-`GCHAT_WEBHOOK_URL` is read from the `.env` file in the project root by
-`load_env_file()` in `app/config.py` (written by hand, because python-dotenv is not
-one of the libraries the project statement allows). To point the reminders at
-a different space, create an incoming webhook in that space under
-**Apps & integrations -> Add webhooks** and replace the value in `.env`.
+`GCHAT_WEBHOOK_URL` comes from the `.env` file in the project root, read by
+`load_env_file()` in `app/config.py`. That function is written by hand because
+python-dotenv is not one of the libraries the project statement allows. To use
+a different space, create an incoming webhook there under Apps & integrations,
+Add webhooks, and replace the value in `.env`.
 
 `Config.MAIL_SERVER` is empty by default, so e-mail is written to
-`instance/outbox/` as `.eml` files rather than sent. That way the monthly
-report and the export alert can be demonstrated without an SMTP server. Set
-the `MAIL_*` values in `app/config.py` to send for real.
+`instance/outbox/` as `.eml` files rather than sent. The monthly report and the
+export alert can therefore be demonstrated with no SMTP server. Fill in the
+`MAIL_*` values in `app/config.py` to send for real.
 
 ## Notes
 
-- `instance/` holds the SQLite database, the mail outbox and generated CSVs.
-  It is created at runtime and is not in version control.
-- The database is created by `db.create_all()` in `app/cli.py`, never by hand
-  in a GUI tool.
-- Redis must be running before the API starts, or the first cached request
-  will fail.
+`instance/` holds the SQLite database, the mail outbox and the generated CSVs.
+It is created at runtime and is not in version control.
+
+The database is created by `db.create_all()` in `app/cli.py`, never by hand in
+a GUI tool.
+
+Redis has to be running before the API starts, or the first request that hits
+the cache will fail.
