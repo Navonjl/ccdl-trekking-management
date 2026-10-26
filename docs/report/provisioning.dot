@@ -1,0 +1,12 @@
+// Fig. 2.2, provisioning stages, one script each.
+digraph provisioning {
+  graph [rankdir=LR, fontname="Liberation Sans", fontsize=11, pad=0.2, nodesep=0.3, ranksep=0.35];
+  node  [shape=box, style="rounded,filled", fontname="Liberation Sans", fontsize=10, fillcolor="#ffffff", color="#52514e"];
+  edge  [color="#52514e", arrowsize=0.6];
+    i1 [label="Foundation\nVNet, ACR, AKS,\nPostgreSQL"];
+    i2 [label="Services\nRedis, Service Bus,\nStorage, Key Vault,\nidentity"];
+    i3 [label="Edge\napp routing,\ncert-manager"];
+    i4 [label="Jobs and\nmonitoring\nFunctions, alerts"];
+    i5 [label="Bicep what-if\ndrift check", fillcolor="#eef4fc", color="#2a78d6"];
+    i1 -> i2 -> i3 -> i4 -> i5;
+}

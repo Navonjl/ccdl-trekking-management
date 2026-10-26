@@ -1,0 +1,1 @@
+tcp connect 62 ms, tls done 125 ms, first byte 178 ms (mean of 15)

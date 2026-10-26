@@ -1,13 +1,9 @@
-# Trekking Management Application (MAD-2)
+# Head in the Clouds (CCDL)
 
 A web application for running trekking trips, with three roles: Admin, Trek
 Staff and User (Trekker). Flask serves a JSON API, Vue 3 provides the
 interface, SQLite stores the data, Redis caches the trek listing, and Celery
 runs the batch jobs.
-
-## Demo video
-
-https://drive.google.com/file/d/1U_JzIsp07bKsglbXrQOeZfjqiluvrjXR/view?usp=sharing
 
 ## What is where
 
@@ -104,7 +100,8 @@ from app.tasks import send_daily_reminders; print(send_daily_reminders())"
 The reminder job posts to a Google Chat space when a webhook is configured, and
 writes e-mail when it is not.
 
-`GCHAT_WEBHOOK_URL` comes from the `.env` file in the project root, read by
+`GCHAT_WEBHOOK_URL` comes from the `.env` file in the project root (copy
+`.env.example` to start one; `.env` itself is not tracked), read by
 `load_env_file()` in `app/config.py`. That function is written by hand because
 python-dotenv is not one of the libraries the project statement allows. To use
 a different space, create an incoming webhook there under Apps & integrations,
@@ -114,6 +111,52 @@ Add webhooks, and replace the value in `.env`.
 `instance/outbox/` as `.eml` files rather than sent. The monthly report and the
 export alert can therefore be demonstrated with no SMTP server. Fill in the
 `MAIL_*` values in `app/config.py` to send for real.
+
+## Deploying to Azure
+
+`deploy/azure/` holds seven scripts that build the lab deployment on Azure with
+the `az` CLI, sized for an Azure for Students subscription and on the free
+tier of each Azure service that has one. Run them in order
+from a shell that is signed in with `az login`; each one logs its commands and
+their output to `deploy/azure/logs/`, with generated secrets masked.
+
+| Script | What it creates |
+| --- | --- |
+| `01-foundation.sh` | resource group, VNet, ACR, Log Analytics, AKS, PostgreSQL 17 |
+| `02-services.sh` | Azure Managed Redis, Service Bus queue, Blob Storage, Key Vault, workload identity, secrets |
+| `03-deploy.sh` | image built with Podman and pushed to ACR, front end uploaded to Blob, Helm release on AKS |
+| `04-edge.sh` | AKS application routing (managed NGINX) with a Let's Encrypt certificate and rate limits, routing `/api/*` to the API and the rest to Blob |
+| `05-jobs-and-monitoring.sh` | Function app timers that replace Celery beat, alerts, budget |
+| `06-bicep-what-if.sh` | compiles `deploy/bicep/main.bicep` and runs `what-if` against the live resource group; changes nothing |
+| `07-github-actions.sh` | managed identity that GitHub Actions signs in as over OIDC, with push, cluster and blob roles |
+
+`helm` and `kubectl` are pinned in `mise.toml`, so `mise install` provides
+them. The chart is in `deploy/helm/hitc`, the timer functions in `functions/`, and
+the same infrastructure as one Bicep template in `deploy/bicep/main.bicep`.
+Generated passwords end up in `deploy/azure/.state.env`, which is not tracked.
+
+To stop paying for compute between demos:
+
+```bash
+az aks stop -g hitc-rg -n hitc-aks
+az postgres flexible-server stop -g hitc-rg -n hitc602-pg
+```
+
+`start` brings them back.
+
+Azure for Students subscriptions cannot create Front Door profiles or run ACR
+Tasks, so the lab builds images locally with Podman and uses the AKS
+application routing add-on as its edge. `optional-front-door.sh` adds the Front
+Door and WAF edge from the design on a pay-as-you-go subscription.
+
+Every push to `main` that touches the app runs `.github/workflows/deploy.yml`:
+a smoke test and front-end build, then an OIDC sign-in to Azure, an image
+tagged with the commit, and a Helm rollout. No password is stored in the
+repository.
+
+`rollout.sh` ships a code change from a laptop in about a
+minute: it rebuilds only the changed image layers and the front end if it
+changed, then rolls the pods one at a time. `az group delete -n hitc-rg` removes everything.
 
 ## Notes
 

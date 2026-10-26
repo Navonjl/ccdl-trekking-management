@@ -1,0 +1,50 @@
+// Fig. 2.1, system architecture. Rendered by docs/report/build_figures.sh.
+digraph hitc {
+  graph [rankdir=LR, fontname="Liberation Sans", fontsize=11, pad=0.2, nodesep=0.35, ranksep=0.55, splines=true, newrank=true];
+  node  [shape=box, style="rounded,filled", fontname="Liberation Sans", fontsize=10, fillcolor="#ffffff", color="#52514e", penwidth=1];
+  edge  [fontname="Liberation Sans", fontsize=8.5, color="#52514e", fontcolor="#52514e", arrowsize=0.6];
+
+  user [label="Browser\n(trekker, staff, admin)", shape=box, fillcolor="#f2f2f0"];
+
+  subgraph cluster_azure {
+    label="Microsoft Azure, Central India"; labeljust=l; style="rounded"; color="#9a9994"; fontcolor="#52514e";
+
+    subgraph cluster_vnet {
+      label="Virtual network hitc-vnet"; labeljust=l; style="rounded,dashed"; color="#9a9994";
+
+      subgraph cluster_aks {
+        label="AKS cluster hitc-aks"; labeljust=l; style="rounded,filled"; fillcolor="#eef4fc"; color="#2a78d6";
+        ingress [label="App routing NGINX\nTLS (Let's Encrypt)\nrate limits"];
+        api     [label="trek-api pods\nFlask + gunicorn\nHPA 2-10"];
+        worker  [label="trek-worker pods\nCelery\nKEDA 1-6"];
+        csi     [label="Key Vault CSI driver\nWorkload identity", fillcolor="#f7f7f5"];
+      }
+      pg [label="PostgreSQL 17\nflexible server\nprivate access", fillcolor="#e8f6f0", color="#1baf7a"];
+    }
+
+    blob   [label="Blob Storage\nstatic site + exports", fillcolor="#e8f6f0", color="#1baf7a"];
+    redis  [label="Azure Managed Redis\ncache + job results", fillcolor="#e8f6f0", color="#1baf7a"];
+    bus    [label="Service Bus\nqueue 'celery'\n+ dead-letter", fillcolor="#e8f6f0", color="#1baf7a"];
+    func   [label="Azure Functions\ntimer triggers", fillcolor="#fdeee7", color="#eb6834"];
+    kv     [label="Key Vault\nsecrets", fillcolor="#fdeee7", color="#eb6834"];
+    acr    [label="Container Registry\nhitc602acr", fillcolor="#fdeee7", color="#eb6834"];
+    mon    [label="Azure Monitor\nContainer Insights\nalerts", fillcolor="#fdeee7", color="#eb6834"];
+  }
+
+  user -> ingress [label="HTTPS"];
+  ingress -> api [label="/api/*"];
+  ingress -> blob [label="other paths"];
+  api -> pg [label="SQL"];
+  api -> redis;
+  api -> bus [label="enqueue"];
+  bus -> worker [label="consume"];
+  worker -> pg;
+  worker -> blob [label="CSV upload"];
+  worker -> redis [label="result"];
+  func -> bus [label="daily, monthly"];
+  kv -> csi [label="secrets"];
+  csi -> api [style=dashed, arrowhead=none];
+  csi -> worker [style=dashed, arrowhead=none];
+  acr -> api [label="image pull", style=dotted];
+  api -> mon [style=dotted, arrowhead=none];
+}

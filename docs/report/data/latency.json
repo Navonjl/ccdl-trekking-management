@@ -1,0 +1,26 @@
+{
+  "Front end page (Blob via ingress)": {
+    "n": 300,
+    "ok": 300,
+    "p50": 226.5,
+    "p90": 320.1,
+    "p99": 391.4,
+    "mean": 243.9
+  },
+  "Health check (PostgreSQL query)": {
+    "n": 300,
+    "ok": 300,
+    "p50": 201.9,
+    "p90": 229.9,
+    "p99": 261.3,
+    "mean": 203.9
+  },
+  "Trek listing (Redis cache)": {
+    "n": 300,
+    "ok": 300,
+    "p50": 200.4,
+    "p90": 235.3,
+    "p99": 281.9,
+    "mean": 202.0
+  }
+}

@@ -1,0 +1,1 @@
+[["image build", 8], ["push to ACR", 11], ["helm upgrade and rolling update", 49], ["public health check", 55]]

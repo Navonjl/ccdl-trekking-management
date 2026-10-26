@@ -1,0 +1,15 @@
+// Fig. 2.3, the release pipeline run for every change.
+digraph release {
+  graph [rankdir=LR, fontname="Liberation Sans", fontsize=11, pad=0.2, nodesep=0.3, ranksep=0.35];
+  node  [shape=box, style="rounded,filled", fontname="Liberation Sans", fontsize=10, fillcolor="#ffffff", color="#52514e"];
+  edge  [color="#52514e", arrowsize=0.6];
+    r1 [label="Git commit\nimage tag =\ncommit SHA"];
+    r2 [label="Container build\ncached layers"];
+    r3 [label="Push to ACR"];
+    r4 [label="Front end build\nupload to Blob"];
+    r5 [label="Helm upgrade\ndb-init hook"];
+    r6 [label="Rolling update\nreadiness probe"];
+    r7 [label="Live", fillcolor="#e8f6f0", color="#1baf7a"];
+    r1 -> r2 -> r3 -> r5 -> r6 -> r7;
+    r1 -> r4 -> r7;
+}
