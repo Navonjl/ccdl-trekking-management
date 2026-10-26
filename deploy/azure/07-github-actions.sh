@@ -15,10 +15,14 @@ missing az identity show -g "$RG" -n "$GH_IDENTITY" &&
 PRINCIPAL=$(az identity show -g "$RG" -n "$GH_IDENTITY" --query principalId -o tsv)
 CLIENT_ID=$(az identity show -g "$RG" -n "$GH_IDENTITY" --query clientId -o tsv)
 
-missing az identity federated-credential show -g "$RG" --identity-name "$GH_IDENTITY" -n github-production &&
-  run az identity federated-credential create --resource-group "$RG" --identity-name "$GH_IDENTITY" \
-    --name github-production --issuer https://token.actions.githubusercontent.com \
-    --subject "repo:$REPO:environment:production" --audiences api://AzureADTokenExchange -o table
+# GitHub's OIDC subject uses immutable IDs next to the names, so renaming the
+# owner or the repo cannot hand the identity to someone else.
+OWNER_ID=$(gh api "repos/$REPO" --jq .owner.id)
+REPO_ID=$(gh api "repos/$REPO" --jq .id)
+SUBJECT="repo:${REPO%%/*}@$OWNER_ID/${REPO#*/}@$REPO_ID:environment:production"
+run az identity federated-credential create --resource-group "$RG" --identity-name "$GH_IDENTITY" \
+  --name github-production --issuer https://token.actions.githubusercontent.com \
+  --subject "$SUBJECT" --audiences api://AzureADTokenExchange -o table
 
 grant() {
   run az role assignment create --assignee-object-id "$PRINCIPAL" --assignee-principal-type ServicePrincipal \
