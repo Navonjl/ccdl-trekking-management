@@ -1,0 +1,4 @@
+[tools]
+"aqua:charmbracelet/freeze" = "0.2.2"
+helm = "4.3.1"
+kubectl = "1.36"

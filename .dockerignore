@@ -1,0 +1,12 @@
+.git
+.venv
+.env
+instance
+frontend
+docs
+deploy
+functions
+node_modules
+.playwright-mcp
+**/__pycache__
+mise.toml

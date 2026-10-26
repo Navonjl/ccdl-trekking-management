@@ -1,0 +1,57 @@
+# Values for the lab deployment. deploy/azure/03-deploy.sh passes the ones
+# that depend on what Azure created (image, identity, vault, storage).
+
+image:
+  repository: hitc602acr.azurecr.io/hitc-api
+  tag: latest
+
+azure:
+  tenantId: ""
+  workloadClientId: ""      # client id of the hitc-workload managed identity
+  keyVaultName: hitc602-kv
+  exportBlobAccountUrl: ""  # https://<account>.blob.core.windows.net/
+
+serviceAccountName: hitc
+
+api:
+  replicas: 2
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPU: 70
+  resources:
+    requests: { cpu: 100m, memory: 192Mi }
+    limits: { cpu: 500m, memory: 384Mi }
+
+worker:
+  minReplicas: 1
+  maxReplicas: 6
+  messagesPerReplica: "5"   # KEDA adds a worker for every 5 queued jobs
+  queueName: celery
+  resources:
+    requests: { cpu: 100m, memory: 192Mi }
+    limits: { cpu: 500m, memory: 384Mi }
+
+# Public entry point: the AKS application routing add-on (Azure's managed
+# NGINX ingress) with a Let's Encrypt certificate from cert-manager for
+# <dnsLabel>.<region>.cloudapp.azure.com. /api/* goes to trek-api and the rest
+# to the static site in Blob Storage. Off until 04-edge.sh has installed the
+# add-on and cert-manager, whose resource types this needs.
+edge:
+  enabled: false
+  dnsLabel: hitc602
+  host: hitc602.centralindia.cloudapp.azure.com
+  webHost: ""               # <account>.z29.web.core.windows.net
+  # Requests per minute per client IP, the stand-in for the WAF rules.
+  loginPerMinute: 20
+  bookingPerMinute: 30
+
+# Key Vault secret name -> environment variable in the pods.
+secrets:
+  database-url: DATABASE_URL
+  redis-url: REDIS_URL
+  celery-broker-url: CELERY_BROKER_URL
+  servicebus-connection: SERVICEBUS_CONNECTION
+  secret-key: SECRET_KEY
+  security-password-salt: SECURITY_PASSWORD_SALT
+  admin-password: ADMIN_PASSWORD
+  gchat-webhook-url: GCHAT_WEBHOOK_URL

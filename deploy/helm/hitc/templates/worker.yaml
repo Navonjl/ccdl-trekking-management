@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trek-worker
+  labels: {{- include "hitc.labels" . | nindent 4 }}
+    app: trek-worker
+spec:
+  replicas: {{ .Values.worker.minReplicas }}
+  selector:
+    matchLabels: { app: trek-worker }
+  template:
+    metadata:
+      labels:
+        app: trek-worker
+        azure.workload.identity/use: "true"
+    spec:
+      {{- include "hitc.podIdentity" . | nindent 6 }}
+      containers:
+        - name: worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ["celery", "-A", "celery_worker.celery", "worker", "--loglevel=info", "--concurrency=2"]
+          {{- include "hitc.env" . | nindent 10 }}
+          resources: {{- toYaml .Values.worker.resources | nindent 12 }}
+---
+# KEDA scales the workers on the Service Bus queue length instead of CPU,
+# since a worker waiting on a queue uses no CPU at all.
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: servicebus
+  labels: {{- include "hitc.labels" . | nindent 4 }}
+spec:
+  secretTargetRef:
+    - parameter: connection
+      name: hitc-secrets
+      key: SERVICEBUS_CONNECTION
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: trek-worker
+  labels: {{- include "hitc.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    name: trek-worker
+  minReplicaCount: {{ .Values.worker.minReplicas }}
+  maxReplicaCount: {{ .Values.worker.maxReplicas }}
+  triggers:
+    - type: azure-servicebus
+      metadata:
+        queueName: {{ .Values.worker.queueName }}
+        messageCount: {{ .Values.worker.messagesPerReplica | quote }}
+      authenticationRef:
+        name: servicebus

@@ -1,0 +1,28 @@
+# Creates the tables, roles and admin account before the new API version
+# takes traffic. init-db is idempotent, so running it on every release is
+# safe. Runs after install (the identity and secrets must exist first) and
+# before every upgrade.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init-{{ .Release.Revision }}
+  labels: {{- include "hitc.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install,pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  backoffLimit: 4
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app: db-init
+        azure.workload.identity/use: "true"
+    spec:
+      restartPolicy: OnFailure
+      {{- include "hitc.podIdentity" . | nindent 6 }}
+      containers:
+        - name: init
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ["flask", "--app", "main", "init-db"]
+          {{- include "hitc.env" . | nindent 10 }}

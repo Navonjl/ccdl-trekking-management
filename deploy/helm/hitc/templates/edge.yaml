@@ -1,0 +1,135 @@
+{{- if .Values.edge.enabled }}
+{{- $e := .Values.edge }}
+# An ingress controller of our own from the application routing add-on, so its
+# load balancer gets a cloudapp.azure.com name that Let's Encrypt can verify.
+apiVersion: approuting.kubernetes.azure.com/v1alpha1
+kind: NginxIngressController
+metadata:
+  name: hitc-edge
+  labels: {{- include "hitc.labels" . | nindent 4 }}
+spec:
+  ingressClassName: hitc-edge
+  controllerNamePrefix: hitc-edge
+  # Each NGINX replica requests half a CPU, a quarter of a lab node.
+  scaling:
+    minReplicas: 1
+    maxReplicas: 2
+  loadBalancerAnnotations:
+    service.beta.kubernetes.io/azure-dns-label-name: {{ $e.dnsLabel }}
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+  labels: {{- include "hitc.labels" . | nindent 4 }}
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-account
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: hitc-edge
+---
+# The static site lives in Blob Storage; this makes it addressable as a
+# Service so the ingress can proxy to it.
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  labels: {{- include "hitc.labels" . | nindent 4 }}
+spec:
+  type: ExternalName
+  externalName: {{ $e.webHost }}
+  ports:
+    - port: 443
+{{- range $name, $spa := dict "web" true "web-assets" false }}
+---
+# {{ if $spa }}Every page path is a route inside the Vue app, so it is rewritten
+# to index.html; this way a deep link answers 200 instead of Blob's 404.{{ else }}Built assets pass through unchanged.{{ end }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $name }}
+  labels: {{- include "hitc.labels" $ | nindent 4 }}
+  annotations:
+    {{- if $spa }}
+    cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/rewrite-target: /index.html
+    {{- end }}
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/upstream-vhost: {{ $e.webHost }}
+    nginx.ingress.kubernetes.io/proxy-ssl-server-name: "on"
+    nginx.ingress.kubernetes.io/proxy-ssl-name: {{ $e.webHost }}
+spec:
+  ingressClassName: hitc-edge
+  tls:
+    - hosts: [{{ $e.host }}]
+      secretName: hitc-tls
+  rules:
+    - host: {{ $e.host }}
+      http:
+        paths:
+          {{- if $spa }}
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service: { name: web, port: { number: 443 } }
+          {{- else }}
+          - path: /assets
+            pathType: ImplementationSpecific
+            backend:
+              service: { name: web, port: { number: 443 } }
+          - path: /favicon.svg
+            pathType: ImplementationSpecific
+            backend:
+              service: { name: web, port: { number: 443 } }
+          {{- end }}
+{{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api
+  labels: {{- include "hitc.labels" . | nindent 4 }}
+spec:
+  ingressClassName: hitc-edge
+  tls:
+    - hosts: [{{ $e.host }}]
+      secretName: hitc-tls
+  rules:
+    - host: {{ $e.host }}
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service: { name: trek-api, port: { number: 80 } }
+{{- range $name, $rule := dict "login" (list "/api/accounts/login" $e.loginPerMinute) "booking" (list "/api/bookings" $e.bookingPerMinute) }}
+---
+# Rate limit for {{ $name }}, per client IP. NGINX answers 503 past the limit.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-{{ $name }}
+  labels: {{- include "hitc.labels" $ | nindent 4 }}
+  annotations:
+    nginx.ingress.kubernetes.io/limit-rpm: {{ index $rule 1 | quote }}
+    # NGINX lets a burst of five times the limit through by default.
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "1"
+spec:
+  ingressClassName: hitc-edge
+  tls:
+    - hosts: [{{ $e.host }}]
+      secretName: hitc-tls
+  rules:
+    - host: {{ $e.host }}
+      http:
+        paths:
+          - path: {{ index $rule 0 }}
+            pathType: Prefix
+            backend:
+              service: { name: trek-api, port: { number: 80 } }
+{{- end }}
+{{- end }}
