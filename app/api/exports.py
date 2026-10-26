@@ -4,7 +4,8 @@ Three steps, one endpoint each:
 
 1. POST /api/exports/bookings   hand the work to Celery, get a task id back
 2. GET  /api/exports/<task_id>  the SPA polls this until the state is ready
-3. GET  /api/exports/download/<filename> fetch the finished file
+3. GET  /api/exports/download/<filename> fetch the finished file, or in the
+   cluster, get a short-lived Blob Storage link to it
 
 The Flask request never builds the CSV itself; the Celery worker does, so the
 browser is not left waiting on it.
@@ -15,6 +16,7 @@ from flask import Blueprint, current_app, jsonify, send_from_directory
 from flask_security import auth_required, current_user
 from werkzeug.utils import secure_filename
 
+from .. import blob_store
 from ..config import Config
 from ..tasks import export_bookings_csv
 from . import blocked_check, error
@@ -76,6 +78,13 @@ def download_export(filename):
 
     if not is_my_export(safe_name):
         return error("This export does not belong to you.", 403)
+
+    # In the cluster the worker put the file in Blob Storage. Hand back a
+    # signed link that expires, and the browser downloads straight from Blob.
+    if blob_store.enabled():
+        if not blob_store.exists(safe_name):
+            return error("Export file not found.", 404)
+        return jsonify({"url": blob_store.download_url(safe_name)})
 
     if not (Config.EXPORT_DIR / safe_name).is_file():
         return error("Export file not found.", 404)

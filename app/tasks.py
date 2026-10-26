@@ -12,10 +12,12 @@ context, so `db.session` here needs no setup of its own.
 """
 
 import csv
+import io
 from datetime import date, datetime, timedelta
 
 from celery import shared_task
 
+from . import blob_store
 from .config import Config
 from .extensions import db
 from .mailer import send_email, send_gchat
@@ -125,7 +127,7 @@ def send_monthly_activity_report():
     <tr><th>Trek</th><th>Location</th><th>Difficulty</th><th>Trekkers</th></tr>
     {rows}
   </table>
-  <p style="color: #666;">Generated automatically by the Trekking Management Application.</p>
+  <p style="color: #666;">Generated automatically by Head in the Clouds.</p>
 </body></html>"""
 
     sent = send_email(
@@ -168,23 +170,31 @@ def export_bookings_csv(user_id):
 
     # Timestamp keeps every export a separate file, so two clicks never clash.
     filename = f"bookings-user{user_id}-{datetime.now():%Y%m%d-%H%M%S}.csv"
-    Config.EXPORT_DIR.mkdir(parents=True, exist_ok=True)
-    path = Config.EXPORT_DIR / filename
 
-    with open(path, "w", newline="", encoding="utf-8") as handle:
-        writer = csv.writer(handle)
-        writer.writerow(CSV_COLUMNS)
-        for booking in bookings:
-            trek = booking.trek
-            writer.writerow([
-                booking.user_id,
-                trek.name,
-                trek.location,
-                booking.status,
-                booking.booking_date.strftime("%Y-%m-%d %H:%M"),
-                trek.start_date or "",
-                trek.end_date or "",
-            ])
+    buffer = io.StringIO(newline="")
+    writer = csv.writer(buffer)
+    writer.writerow(CSV_COLUMNS)
+    for booking in bookings:
+        trek = booking.trek
+        writer.writerow([
+            booking.user_id,
+            trek.name,
+            trek.location,
+            booking.status,
+            booking.booking_date.strftime("%Y-%m-%d %H:%M"),
+            trek.start_date or "",
+            trek.end_date or "",
+        ])
+
+    # In the cluster the file goes to Blob Storage; locally to instance/exports.
+    if blob_store.enabled():
+        blob_store.upload_csv(filename, buffer.getvalue())
+        where = f"blob {filename}"
+    else:
+        Config.EXPORT_DIR.mkdir(parents=True, exist_ok=True)
+        path = Config.EXPORT_DIR / filename
+        path.write_text(buffer.getvalue(), encoding="utf-8")
+        where = str(path)
 
     send_email(
         user.email,
@@ -194,5 +204,5 @@ def export_bookings_csv(user_id):
         f"<b>{filename}</b>. Download it from your dashboard.</p>",
     )
 
-    print(f"[export] wrote {path} ({len(bookings)} rows)")
+    print(f"[export] wrote {where} ({len(bookings)} rows)")
     return {"filename": filename, "rows": len(bookings)}

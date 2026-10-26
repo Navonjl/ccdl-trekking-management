@@ -4,6 +4,7 @@ Read this file first: it shows how every other piece is attached.
 """
 
 from flask import Flask, jsonify
+from sqlalchemy import text
 from flask_security import SQLAlchemyUserDatastore
 from werkzeug.exceptions import HTTPException
 
@@ -41,6 +42,20 @@ def create_app():
 
     from .cli import register_cli
     register_cli(app)
+
+    @app.get("/api/health")
+    def health():
+        """Readiness probe for Kubernetes and the Front Door origin probe.
+
+        Fails when the database is unreachable, so a pod that cannot serve is
+        taken out of rotation instead of answering with errors.
+        """
+        try:
+            db.session.execute(text("SELECT 1"))
+        except Exception:
+            app.logger.exception("health check: database unreachable")
+            return jsonify({"status": "unavailable"}), 503
+        return jsonify({"status": "ok"})
 
     # This app only ever answers with JSON, so errors should be JSON too.
     # Without this, sending a number where a name was expected returns an HTML

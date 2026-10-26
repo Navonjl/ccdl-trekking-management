@@ -7,7 +7,12 @@
 app.extensions["celery"], which is the object Celery needs here.
 """
 
+import logging
+
 from app import create_app
+
+# The Azure Service Bus SDK logs every AMQP state change at INFO.
+logging.getLogger("azure").setLevel(logging.WARNING)
 
 flask_app = create_app()
 celery = flask_app.extensions["celery"]

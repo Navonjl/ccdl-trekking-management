@@ -192,6 +192,14 @@ export const api = {
     })
     if (!response.ok) throw new Error(`Could not download the file (HTTP ${response.status}).`)
 
+    // On Azure the API answers with a short-lived Blob Storage link instead of
+    // the file itself; that link needs no token, so the browser can follow it.
+    if (response.headers.get('Content-Type')?.includes('application/json')) {
+      const { url } = await response.json()
+      window.location.assign(url)
+      return
+    }
+
     const url = URL.createObjectURL(await response.blob())
     const link = document.createElement('a')
     link.href = url
