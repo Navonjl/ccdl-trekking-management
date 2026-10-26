@@ -1,0 +1,117 @@
+# Test, build and release on every push to main that touches the app.
+#
+# Signs in to Azure with OIDC as the hitc-github managed identity (set up by
+# deploy/azure/07-github-actions.sh), so the repository holds no password.
+# The image is tagged with the commit, which makes `helm rollback` to any
+# earlier commit a one-line operation.
+
+name: deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - app/**
+      - frontend/**
+      - Dockerfile
+      - main.py
+      - celery_worker.py
+      - pyproject.toml
+      - uv.lock
+      - deploy/helm/**
+      - .github/workflows/deploy.yml
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+# One release at a time; a second push waits for the first to finish.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  RG: hitc-rg
+  AKS: hitc-aks
+  ACR: hitc602acr
+  STORAGE: hitc602st
+  SITE: hitc602.centralindia.cloudapp.azure.com
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Smoke test against SQLite
+        run: |
+          uv run flask --app main init-db
+          uv run flask --app main seed-demo
+          uv run python -c "
+          from app import create_app
+          c = create_app().test_client()
+          assert c.get('/api/health').json == {'status': 'ok'}
+          r = c.post('/api/accounts/login?include_auth_token', json={'email': 'asha@example.com', 'password': 'trekker123'})
+          assert r.status_code == 200, r.json
+          print('health and login ok')
+          "
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Build the front end
+        working-directory: frontend
+        run: npm ci && npm run build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push the image
+        run: |
+          TAG=${GITHUB_SHA::7}
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          az acr login --name "$ACR"
+          docker build -t "$ACR.azurecr.io/hitc-api:$TAG" .
+          docker push "$ACR.azurecr.io/hitc-api:$TAG"
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: frontend-dist
+          path: dist
+      - name: Publish the front end
+        run: |
+          az storage blob upload-batch --auth-mode login --account-name "$STORAGE" \
+            --destination '$web' --source dist --overwrite --only-show-errors -o none
+
+      - uses: azure/setup-helm@v5
+        with:
+          version: v4.3.1
+      - name: Roll out on AKS
+        run: |
+          az aks get-credentials --resource-group "$RG" --name "$AKS" --overwrite-existing
+          helm upgrade hitc deploy/helm/hitc --namespace hitc --reuse-values \
+            --set image.tag="$TAG" --wait --timeout 5m
+          kubectl -n hitc rollout status deploy/trek-api --timeout 2m
+
+      - name: Check the live site
+        run: |
+          curl -sS --retry 5 --retry-delay 5 --fail "https://$SITE/api/health"
+          echo
+          echo "released $TAG to https://$SITE" >> "$GITHUB_STEP_SUMMARY"
