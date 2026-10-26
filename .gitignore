@@ -38,3 +38,11 @@ docs/images/project-folder-structure.png
 docs/images/submission-file-tree.png
 docs/images/submission-portal-fields.png
 docs/images/viva-workflow-flowchart.png
+
+# Local settings with real webhook tokens. .env.example is the template.
+.env
+
+# Azure deploy state: generated passwords and keys.
+deploy/azure/.state.env
+deploy/azure/logs/
+deploy/azure/.kubeconfig
