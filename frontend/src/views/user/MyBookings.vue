@@ -161,7 +161,7 @@ export default {
 
       <div class="d-flex align-items-center gap-2 flex-wrap">
         <button
-          class="btn btn-outline-success btn-sm"
+          class="btn btn-outline-primary btn-sm"
           @click="startExport"
           :disabled="exportState === 'PENDING' || exportState === 'STARTED'"
         >
@@ -172,7 +172,7 @@ export default {
           Working... (task {{ taskId }})
         </span>
 
-        <button v-if="exportFile" class="btn btn-success btn-sm" @click="download">
+        <button v-if="exportFile" class="btn btn-primary btn-sm" @click="download">
           Download {{ exportFile }}
         </button>
       </div>

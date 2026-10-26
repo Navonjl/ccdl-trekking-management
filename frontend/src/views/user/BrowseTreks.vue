@@ -68,6 +68,12 @@ export default {
     canBook(trek) {
       return trek.status === 'Open' && trek.available_slots > 0
     },
+
+    /** Width of the "slots left" bar, as a CSS percentage. */
+    slotsPercent(trek) {
+      if (!trek.total_slots) return '0%'
+      return `${Math.round((trek.available_slots / trek.total_slots) * 100)}%`
+    },
   },
 }
 </script>
@@ -108,7 +114,7 @@ export default {
         </div>
       </div>
       <div class="mt-3">
-        <button class="btn btn-success" :disabled="loading">
+        <button class="btn btn-primary" :disabled="loading">
           {{ loading ? 'Searching...' : 'Search' }}
         </button>
         <button type="button" class="btn btn-outline-secondary ms-2" @click="resetFilters">Reset</button>
@@ -123,28 +129,47 @@ export default {
          and 3 on a desktop, which covers the responsive requirement. -->
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
       <div class="col" v-for="trek in treks" :key="trek.id">
-        <div class="card h-100">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-              <h5 class="card-title mb-1">{{ trek.name }}</h5>
-              <span class="badge" :class="difficultyClass(trek.difficulty)">{{ trek.difficulty }}</span>
-            </div>
-            <h6 class="card-subtitle text-muted mb-2">{{ trek.location }}</h6>
+        <div class="card trek-card h-100">
+          <!-- Banner coloured by difficulty, with a ridge drawn along its foot. -->
+          <div class="trek-banner" :class="'trek-banner-' + (trek.difficulty || 'easy').toLowerCase()">
+            <svg viewBox="0 0 400 60" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0 60 L0 40 L60 18 L110 38 L170 6 L230 34 L290 14 L350 36 L400 22 L400 60 Z" fill="rgba(255,255,255,0.28)" />
+              <path d="M0 60 L0 50 L80 32 L150 50 L230 28 L310 48 L400 36 L400 60 Z" fill="#fff" />
+            </svg>
+            <span class="badge" :class="difficultyClass(trek.difficulty)">{{ trek.difficulty }}</span>
+            <span class="trek-price">Rs. {{ trek.price }}</span>
+          </div>
+
+          <div class="card-body pt-2">
+            <h5 class="card-title mb-0">{{ trek.name }}</h5>
+            <div class="text-muted small mb-2">{{ trek.location }}</div>
             <p class="card-text small">{{ trek.description }}</p>
 
-            <ul class="list-unstyled small mb-0">
-              <li><strong>Duration:</strong> {{ trek.duration_days }} day(s)</li>
-              <li><strong>Dates:</strong> {{ trek.start_date || '-' }} to {{ trek.end_date || '-' }}</li>
-              <li><strong>Price:</strong> Rs. {{ trek.price }}</li>
-              <li><strong>Slots left:</strong> {{ trek.available_slots }} / {{ trek.total_slots }}</li>
-              <li><strong>Status:</strong> {{ trek.status }}</li>
-              <li v-if="trek.assigned_staff_name"><strong>Guide:</strong> {{ trek.assigned_staff_name }}</li>
-            </ul>
+            <dl class="trek-facts mb-3">
+              <dt>Duration</dt>
+              <dd>{{ trek.duration_days }} day(s)</dd>
+              <dt>Dates</dt>
+              <dd>{{ trek.start_date || '-' }} to {{ trek.end_date || '-' }}</dd>
+              <dt>Status</dt>
+              <dd>{{ trek.status }}</dd>
+              <template v-if="trek.assigned_staff_name">
+                <dt>Guide</dt>
+                <dd>{{ trek.assigned_staff_name }}</dd>
+              </template>
+            </dl>
+
+            <div class="d-flex justify-content-between small mb-1">
+              <span class="fw-semibold">Slots left</span>
+              <span>{{ trek.available_slots }} / {{ trek.total_slots }}</span>
+            </div>
+            <div class="progress slots-bar" role="progressbar" :aria-valuenow="trek.available_slots" aria-valuemin="0" :aria-valuemax="trek.total_slots">
+              <div class="progress-bar" :style="{ width: slotsPercent(trek) }"></div>
+            </div>
           </div>
-          <div class="card-footer bg-white">
+          <div class="card-footer border-0 pt-0 pb-3">
             <button
               class="btn btn-sm w-100"
-              :class="canBook(trek) ? 'btn-success' : 'btn-secondary'"
+              :class="canBook(trek) ? 'btn-primary' : 'btn-secondary'"
               :disabled="!canBook(trek) || bookingId === trek.id"
               @click="book(trek)"
             >

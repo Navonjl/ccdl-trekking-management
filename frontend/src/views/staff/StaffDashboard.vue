@@ -138,7 +138,7 @@ export default {
                 </select>
               </div>
               <div class="col-3">
-                <button class="btn btn-sm btn-success w-100" :disabled="savingId === trek.id">
+                <button class="btn btn-sm btn-primary w-100" :disabled="savingId === trek.id">
                   {{ savingId === trek.id ? '...' : 'Save' }}
                 </button>
               </div>
@@ -148,7 +148,7 @@ export default {
           <div class="card-footer bg-white">
             <!-- Navigating here mounts StaffParticipants.vue with this trek id. -->
             <router-link
-              class="btn btn-sm btn-outline-success w-100"
+              class="btn btn-sm btn-outline-primary w-100"
               :to="'/staff/treks/' + trek.id + '/participants'"
             >
               View participants

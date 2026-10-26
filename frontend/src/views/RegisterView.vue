@@ -5,9 +5,11 @@
  * neither can be registered from this page.
  */
 import { api } from '@/api'
+import BrandLogo from '@/components/BrandLogo.vue'
 
 export default {
   name: 'RegisterView',
+  components: { BrandLogo },
   data() {
     return {
       form: { full_name: '', email: '', phone: '', password: '' },
@@ -46,14 +48,18 @@ export default {
 </script>
 
 <template>
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <h1 class="h3 mb-3">Register as a trekker</h1>
+  <div class="row justify-content-center pt-md-3">
+    <div class="col-md-7 col-lg-6">
+      <div class="text-center mb-4">
+        <BrandLogo class="auth-logo mb-2" />
+        <h1 class="h3 mb-1">Join Head in the Clouds</h1>
+        <p class="auth-tagline mb-0">Create a trekker account to book your first trek.</p>
+      </div>
 
       <div v-if="error" class="alert alert-danger">{{ error }}</div>
       <div v-if="success" class="alert alert-success">{{ success }}</div>
 
-      <form @submit.prevent="submit" class="card card-body">
+      <form @submit.prevent="submit" class="card auth-card">
         <div class="mb-3">
           <label class="form-label" for="name">Full name</label>
           <input
@@ -109,7 +115,7 @@ export default {
           />
         </div>
 
-        <button class="btn btn-success w-100" :disabled="busy">
+        <button class="btn btn-primary w-100" :disabled="busy">
           {{ busy ? 'Creating...' : 'Register' }}
         </button>
       </form>

@@ -1,0 +1,263 @@
+// Theme for Head in the Clouds.
+//
+// Bootstrap is compiled from its Sass source with the variables below set
+// first, so every btn-primary, badge and focus ring picks up the sky palette
+// without overriding compiled CSS rule by rule.
+
+$navy: #13294b;
+
+$primary: #2a6fdb;
+$success: #1f9d6b;
+$info: #38bdf8;
+$warning: #f5a524;
+$danger: #e5484d;
+
+$body-color: #1e2b40;
+$body-bg: #f3f8ff;
+$headings-color: $navy;
+$headings-font-weight: 800;
+$font-family-sans-serif: "Nunito Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+$border-radius: 0.6rem;
+$border-radius-sm: 0.45rem;
+$border-radius-lg: 1rem;
+$card-border-width: 0;
+$card-bg: #fff;
+$card-border-radius: 1rem;
+$card-cap-bg: transparent;
+$btn-font-weight: 700;
+$badge-font-weight: 700;
+$link-decoration: none;
+$link-hover-decoration: underline;
+
+@import "bootstrap/scss/bootstrap";
+
+// ---------------------------------------------------------------------------
+// Page background: a sky that fades to near-white, clouds drifting across it
+// and a mountain ridge along the bottom. It sits behind everything (z-index
+// -1) and never takes clicks.
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #cfe4ff 0%, #e6f1ff 35%, $body-bg 70%) fixed;
+}
+
+#app {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#app > main {
+  flex: 1;
+}
+
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sky-cloud {
+  position: absolute;
+  left: -260px;
+  width: 240px;
+  opacity: 0.85;
+  filter: drop-shadow(0 6px 10px rgba(42, 111, 219, 0.12));
+  animation: drift linear infinite;
+}
+
+.sky-cloud-1 { top: 9%;  width: 260px; animation-duration: 95s;  animation-delay: -30s; }
+.sky-cloud-2 { top: 26%; width: 180px; animation-duration: 120s; animation-delay: -85s; opacity: 0.7; }
+.sky-cloud-3 { top: 48%; width: 140px; animation-duration: 150s; animation-delay: -10s; opacity: 0.55; }
+
+@keyframes drift {
+  to { transform: translateX(calc(100vw + 520px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-cloud { animation: none; left: auto; right: 8%; }
+  .sky-cloud-2 { right: 60%; }
+  .sky-cloud-3 { right: 30%; }
+}
+
+.sky-ridge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 22vh;
+  min-height: 120px;
+}
+
+// ---------------------------------------------------------------------------
+// Navbar: frosted white over the sky.
+
+.navbar-cloud {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba($primary, 0.12);
+
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 800;
+    color: $navy;
+  }
+
+  .nav-link {
+    font-weight: 600;
+    color: rgba($navy, 0.75);
+    border-radius: 999px;
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
+
+    &:hover { color: $primary; }
+
+    &.router-link-active {
+      color: $primary;
+      background: rgba($primary, 0.1);
+    }
+  }
+}
+
+.brand-logo {
+  width: 34px;
+  height: 34px;
+}
+
+// ---------------------------------------------------------------------------
+// Cards float on the sky with a soft blue shadow.
+
+.card {
+  box-shadow:
+    0 1px 2px rgba($navy, 0.05),
+    0 10px 30px rgba($primary, 0.08);
+}
+
+main h1.h3 {
+  letter-spacing: -0.01em;
+}
+
+.table {
+  --bs-table-bg: transparent;
+}
+
+.table > thead th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba($navy, 0.6);
+}
+
+// ---------------------------------------------------------------------------
+// Login and register.
+
+.auth-card {
+  padding: 2rem;
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.auth-logo {
+  width: 72px;
+  height: 72px;
+}
+
+.auth-tagline {
+  color: rgba($navy, 0.65);
+}
+
+// ---------------------------------------------------------------------------
+// Trek cards on the browse page: a banner coloured by difficulty, with a
+// mountain silhouette, then the details.
+
+.trek-card {
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 2px 4px rgba($navy, 0.06),
+      0 16px 40px rgba($primary, 0.16);
+  }
+}
+
+.trek-banner {
+  position: relative;
+  height: 96px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  color: #fff;
+
+  svg {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+  }
+
+  > * { position: relative; }
+}
+
+.trek-banner-easy     { background: linear-gradient(135deg, #34d399, #2a6fdb); }
+.trek-banner-moderate { background: linear-gradient(135deg, #fbbf24, #2a6fdb); }
+.trek-banner-hard     { background: linear-gradient(135deg, #f43f5e, #1e3a8a); }
+
+// The banner colour already says the difficulty, so its badge is a plain chip.
+.trek-banner .badge {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: $navy !important;
+}
+
+.trek-price {
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.9);
+  color: $navy;
+  border-radius: 999px;
+  padding: 0.15rem 0.65rem;
+  font-size: 0.9rem;
+}
+
+.trek-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.75rem;
+  font-size: 0.875rem;
+
+  dt { font-weight: 600; color: rgba($navy, 0.6); }
+  dd { margin: 0; }
+}
+
+.slots-bar {
+  height: 6px;
+}
+
+// ---------------------------------------------------------------------------
+// Admin dashboard count tiles.
+
+.stat-tile {
+  background: linear-gradient(180deg, #fff 60%, rgba($primary, 0.06));
+  transition: transform 0.15s ease;
+
+  &:hover { transform: translateY(-2px); }
+
+  .display-6 {
+    font-weight: 800;
+    color: $primary;
+  }
+}
+
+footer.app-footer {
+  color: rgba($navy, 0.7);
+  border-top: 1px solid rgba($primary, 0.12);
+}

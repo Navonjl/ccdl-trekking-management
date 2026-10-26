@@ -21,6 +21,10 @@ export default {
     return { chart: null }
   },
   mounted() {
+    // Bar colour and font come from the Bootstrap theme, so the chart matches.
+    const theme = getComputedStyle(document.documentElement)
+    const primary = theme.getPropertyValue('--bs-primary').trim()
+    Chart.defaults.font.family = theme.getPropertyValue('--bs-body-font-family').trim()
     this.chart = new Chart(this.$refs.canvas, {
       type: 'bar',
       data: {
@@ -31,7 +35,8 @@ export default {
           {
             label: this.label,
             data: [...this.values],
-            backgroundColor: '#198754', // Bootstrap's success green
+            backgroundColor: primary,
+            borderRadius: 6,
           },
         ],
       },

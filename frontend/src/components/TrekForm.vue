@@ -187,7 +187,7 @@ export default {
     </div>
 
     <div class="mt-3">
-      <button class="btn btn-success">{{ editing ? 'Save changes' : 'Create trek' }}</button>
+      <button class="btn btn-primary">{{ editing ? 'Save changes' : 'Create trek' }}</button>
       <button type="button" class="btn btn-outline-secondary ms-2" @click="$emit('cancel')">Cancel</button>
     </div>
   </form>

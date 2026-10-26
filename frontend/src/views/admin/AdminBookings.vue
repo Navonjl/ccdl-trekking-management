@@ -120,7 +120,7 @@ export default {
         <input id="btrek" v-model="filters.trek_id" type="number" min="1" class="form-control" />
       </div>
       <div class="col-auto">
-        <button class="btn btn-outline-success" :disabled="loading">Apply</button>
+        <button class="btn btn-outline-primary" :disabled="loading">Apply</button>
       </div>
       <div class="col-auto">
         <button
@@ -166,7 +166,7 @@ export default {
                    that the money came in. -->
               <button
                 v-if="b.payment_status !== 'Paid' && b.status !== 'Cancelled'"
-                class="btn btn-sm btn-outline-success"
+                class="btn btn-sm btn-outline-primary"
                 @click="markPaid(b)"
               >
                 Mark as paid

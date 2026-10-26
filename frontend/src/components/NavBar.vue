@@ -4,10 +4,12 @@
  * so a trekker is never shown a link into the admin pages.
  */
 import { api } from '@/api'
+import BrandLogo from '@/components/BrandLogo.vue'
 import { store } from '@/store'
 
 export default {
   name: 'NavBar',
+  components: { BrandLogo },
   data() {
     return { store }
   },
@@ -28,9 +30,12 @@ export default {
 </script>
 
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+  <nav class="navbar navbar-expand-lg navbar-cloud sticky-top">
     <div class="container">
-      <router-link class="navbar-brand" :to="store.homePath()">Trekking&nbsp;MA</router-link>
+      <router-link class="navbar-brand" :to="store.homePath()">
+        <BrandLogo class="brand-logo" />
+        Head in the Clouds
+      </router-link>
 
       <!-- data-bs-* attributes are handled by the Bootstrap JS bundle imported
            in main.js; this is the hamburger menu on small screens. -->
@@ -70,7 +75,7 @@ export default {
             </router-link>
           </li>
           <li class="nav-item">
-            <button class="btn btn-sm btn-light mt-1 ms-lg-2" @click="logout">Logout</button>
+            <button class="btn btn-sm btn-outline-primary mt-1 ms-lg-2" @click="logout">Logout</button>
           </li>
         </ul>
       </div>

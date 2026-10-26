@@ -81,7 +81,7 @@ export default {
   <div>
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h1 class="h3 mb-0">Trek staff</h1>
-      <button class="btn btn-success" @click="showForm = !showForm">
+      <button class="btn btn-primary" @click="showForm = !showForm">
         {{ showForm ? 'Close' : '+ Add staff' }}
       </button>
     </div>
@@ -117,7 +117,7 @@ export default {
         </div>
       </div>
       <div class="mt-3">
-        <button class="btn btn-success">Create staff</button>
+        <button class="btn btn-primary">Create staff</button>
       </div>
     </form>
 
@@ -126,7 +126,7 @@ export default {
         <input v-model.trim="q" class="form-control" placeholder="Search staff by name, email or code" />
       </div>
       <div class="col-auto">
-        <button class="btn btn-outline-success" :disabled="loading">Search</button>
+        <button class="btn btn-outline-primary" :disabled="loading">Search</button>
       </div>
       <div class="col-auto">
         <button type="button" class="btn btn-outline-secondary" @click="q = ''; load()">Clear</button>
@@ -165,7 +165,7 @@ export default {
             <td class="text-end">
               <button
                 class="btn btn-sm"
-                :class="member.active === false ? 'btn-outline-success' : 'btn-outline-danger'"
+                :class="member.active === false ? 'btn-outline-primary' : 'btn-outline-danger'"
                 @click="toggleActive(member)"
               >
                 {{ member.active === false ? 'Reactivate' : 'Deactivate' }}

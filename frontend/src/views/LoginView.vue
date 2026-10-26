@@ -5,10 +5,12 @@
  * /api/me reports back.
  */
 import { api } from '@/api'
+import BrandLogo from '@/components/BrandLogo.vue'
 import { store } from '@/store'
 
 export default {
   name: 'LoginView',
+  components: { BrandLogo },
   data() {
     return {
       email: '',
@@ -48,16 +50,19 @@ export default {
 </script>
 
 <template>
-  <div class="row justify-content-center">
-    <div class="col-md-5">
-      <h1 class="h3 mb-1">Trekking Management</h1>
-      <p class="text-muted">Sign in to continue.</p>
+  <div class="row justify-content-center pt-md-4">
+    <div class="col-md-6 col-lg-5">
+      <div class="text-center mb-4">
+        <BrandLogo class="auth-logo mb-2" />
+        <h1 class="h2 mb-1">Head in the Clouds</h1>
+        <p class="auth-tagline mb-0">Treks above the cloud line. Sign in to continue.</p>
+      </div>
 
       <div v-if="error" class="alert alert-danger">{{ error }}</div>
 
       <!-- No novalidate attribute, so the browser runs HTML5 validation
            (required / type=email) and blocks submit until the form is valid. -->
-      <form @submit.prevent="submit" class="card card-body">
+      <form @submit.prevent="submit" class="card auth-card">
         <div class="mb-3">
           <label class="form-label" for="email">Email</label>
           <input
@@ -82,7 +87,7 @@ export default {
           />
         </div>
 
-        <button class="btn btn-success w-100" :disabled="busy">
+        <button class="btn btn-primary btn-lg w-100" :disabled="busy">
           {{ busy ? 'Signing in...' : 'Login' }}
         </button>
       </form>

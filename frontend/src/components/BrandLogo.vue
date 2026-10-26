@@ -1,0 +1,30 @@
+<script>
+/**
+ * The Head in the Clouds mark: two snow-capped peaks with a cloud across them.
+ * The same drawing is public/favicon.svg.
+ */
+export default {
+  name: 'BrandLogo',
+}
+</script>
+
+<template>
+  <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M30 54 L44 28 L60 54 Z" fill="#5b9be6" />
+    <path d="M44 28 L48.3 35 L46 33.5 L44 36 L42 34 L40.2 35 Z" fill="#fff" />
+    <path d="M4 54 L26 18 L48 54 Z" fill="#1d4f91" />
+    <path d="M26 18 L32.1 28 L29 26 L26 29 L23 26.5 L19.9 28 Z" fill="#fff" />
+    <g fill="#cfe2fa" transform="translate(1.5 1.5)">
+      <circle cx="20" cy="44" r="6" />
+      <circle cx="29" cy="40" r="8" />
+      <circle cx="38" cy="45" r="5.5" />
+      <rect x="12" y="44" width="32" height="7" rx="3.5" />
+    </g>
+    <g fill="#fff">
+      <circle cx="20" cy="44" r="6" />
+      <circle cx="29" cy="40" r="8" />
+      <circle cx="38" cy="45" r="5.5" />
+      <rect x="12" y="44" width="32" height="7" rx="3.5" />
+    </g>
+  </svg>
+</template>

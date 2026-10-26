@@ -85,7 +85,7 @@ export default {
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-3">
       <div class="col" v-for="card in cards" :key="card.label">
         <router-link class="text-decoration-none" :to="card.to">
-          <div class="card text-center h-100">
+          <div class="card stat-tile text-center h-100">
             <div class="card-body">
               <div class="display-6">{{ card.value }}</div>
               <div class="text-muted">{{ card.label }}</div>
@@ -108,10 +108,10 @@ export default {
     <div class="card card-body">
       <h2 class="h5">Manage</h2>
       <div class="d-flex flex-wrap gap-2">
-        <router-link class="btn btn-outline-success" to="/admin/treks">Treks &amp; assignments</router-link>
-        <router-link class="btn btn-outline-success" to="/admin/staff">Trek staff</router-link>
-        <router-link class="btn btn-outline-success" to="/admin/users">Users</router-link>
-        <router-link class="btn btn-outline-success" to="/admin/bookings">All bookings</router-link>
+        <router-link class="btn btn-outline-primary" to="/admin/treks">Treks &amp; assignments</router-link>
+        <router-link class="btn btn-outline-primary" to="/admin/staff">Trek staff</router-link>
+        <router-link class="btn btn-outline-primary" to="/admin/users">Users</router-link>
+        <router-link class="btn btn-outline-primary" to="/admin/bookings">All bookings</router-link>
       </div>
     </div>
   </div>

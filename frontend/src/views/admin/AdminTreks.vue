@@ -130,7 +130,7 @@ export default {
   <div>
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h1 class="h3 mb-0">Treks</h1>
-      <button class="btn btn-success" @click="newTrek">+ New trek</button>
+      <button class="btn btn-primary" @click="newTrek">+ New trek</button>
     </div>
 
     <div v-if="error" class="alert alert-danger">{{ error }}</div>
@@ -150,7 +150,7 @@ export default {
         <input v-model.trim="q" class="form-control" placeholder="Search treks by name or location" />
       </div>
       <div class="col-auto">
-        <button class="btn btn-outline-success" :disabled="loading">Search</button>
+        <button class="btn btn-outline-primary" :disabled="loading">Search</button>
       </div>
       <div class="col-auto">
         <button type="button" class="btn btn-outline-secondary" @click="q = ''; load()">Clear</button>

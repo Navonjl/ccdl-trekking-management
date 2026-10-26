@@ -70,7 +70,7 @@ export default {
         <input v-model.trim="q" class="form-control" placeholder="Search users by name or email" />
       </div>
       <div class="col-auto">
-        <button class="btn btn-outline-success" :disabled="loading">Search</button>
+        <button class="btn btn-outline-primary" :disabled="loading">Search</button>
       </div>
       <div class="col-auto">
         <button type="button" class="btn btn-outline-secondary" @click="q = ''; load()">Clear</button>

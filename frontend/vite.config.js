@@ -13,6 +13,17 @@ export default defineConfig({
     },
   },
 
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // Bootstrap 5.3's Sass still uses @import and the old colour
+        // functions, which current Dart Sass warns about on every build.
+        quietDeps: true,
+        silenceDeprecations: ['import'],
+      },
+    },
+  },
+
   server: {
     port: 5173,
 

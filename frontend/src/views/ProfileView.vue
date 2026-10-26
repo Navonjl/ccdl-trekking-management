@@ -107,7 +107,7 @@ export default {
           </div>
         </div>
 
-        <button class="btn btn-success" :disabled="busy">
+        <button class="btn btn-primary" :disabled="busy">
           {{ busy ? 'Saving...' : 'Save changes' }}
         </button>
       </form>
